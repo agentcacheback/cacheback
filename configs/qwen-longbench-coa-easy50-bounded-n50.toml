@@ -1,0 +1,15 @@
+# qwen3-8b: LongBench v2 chain of agents on the easy fifty: four hops over one document, three samples per item and arm. The latent arms carry a bounded memory: a fixed total row budget handed hop to hop.
+# Run with: python -m rcc.run.entry --config configs/qwen-longbench-coa-easy50-bounded-n50.toml --bundle <bundle dir>
+schema_version = 1
+model = "qwen3-8b"
+benchmark = "longbench-v2-coa-easy50-bounded-sealed"
+topology = "chain-t4"
+arm_profile = "longbench-coa-bounded-6arm-v1"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "qwen-longbench-bounded"
+root = "runs"

@@ -1,112 +1,139 @@
 # Selectors
 
-`transfer` accepts a selector callable and defaults to CacheBack. Budgeting,
-payload encoding and delivery stay in transport; the selector chooses positions.
-The public type alias is `rcc.selectors.Selector`.
+Every selector in `rcc.transforms.select` scores the positions of one worker's
+KV cache and keeps a budgeted subset. `Select(scores, ratio=r)` keeps one
+position in `r`; `Select(scores, budget=n)` keeps `n`; a `schedule` turns the
+position-wise keep into a span-wise keep. Kept positions are RoPE-relocated
+to a contiguous prefix before the receiver reads them, and a keep set that is
+already contiguous from 0 is returned without rotation, bit-identical to the
+full KV.
 
-## Custom selection
+## The span keep law
 
-```python
-import torch
-from rcc import SenderState, transfer
+`span_keep` tiles the score vector into near-equal contiguous spans, ranks them
+by mean token score, and adds whole spans until the budget is spent. The span
+that overshoots the budget contributes exactly the room that is left, as one
+contiguous window around its peak token, clamped inside the span and widened
+past that width wherever it covers positions already kept, so a span never
+scatters into isolated tokens. The sink is force-kept and counted inside the
+budget, and the keep list has length exactly `min(budget, n)`. A kept span is a
+contiguous run relocated to a contiguous target run, so its intra-span offsets
+survive the RoPE relocation and exact-copy content that a token-wise top-k
+would fragment is preserved.
 
-def recent(sender: SenderState, request_ids: torch.Tensor, budget: int) -> list[int]:
-    """Keep the most recent positions within the resolved budget."""
-    length = sender.input_embeds.shape[0]
-    return list(range(length - budget, length))
+## CacheBack (`query_support`)
 
-transfer(senders, receivers, requests, selector=recent)
-```
+CacheBack is receiver-conditioned: the score of a worker position is the
+attention it receives from the receiver's query rows, read off the worker's
+own cache during one extra forward pass over the query. Three vectors come
+out of that capture (`memory_votes_with_energies`):
 
-The function receives one validated sender, its request IDs shaped `[1, tokens]`
-on the sender device, and a positive position budget no larger than its state.
-Return a sequence of Python integers or a one-dimensional int32/int64 tensor.
-Transport rejects empty, duplicate, noninteger, out-of-range or over-budget
-selections, then orders the positions by their original source index.
+- `snap`: mean query attention, the pooled attention mass each position receives
+  from the query rows, max-pooled over a 7-token kernel;
+- `energy`: the attention from the question rows, averaged over the query
+  heads of each KV head, pooled over the same kernel, then squared, so it is
+  the order-2 moment of the attention density each position draws;
+- `row_energy`: the same quantity computed row by row for each question
+  token before averaging, so a position a single question row leans on keeps
+  that concentration instead of having it averaged away.
 
-Custom selectors can return fewer positions and define their own retention rules.
-The example above keeps recent rows without reserving the first position. RCC
-does not run CacheBack or disable gradients around a custom selector. The callable
-must leave the sender's model, cache and input rows unchanged. Exceptions propagate
-before any delivery; selection is reused across receivers of the same request.
+The composed score (`support_corrected_scores`) multiplies `snap` by the
+support ratio `(row_energy / energy) ** alpha`, computed in float32 with that
+dtype's smallest normal value as its floor. The three vectors must describe the
+same memory positions. The registered point is order `p = 2` and correction strength
+`alpha = 2` (`support-p2-a2`), chosen on a 30-item development sweep separate
+from every evaluation panel. Positions whose energies are both zero receive the
+neutral correction of one, which is the all-zero limit, so no epsilon is needed.
 
-Want to compare your method with CacheBack? See the
-[selector challenge and benchmark contribution guide](../CONTRIBUTING.md).
+Scores are then pooled over fixed 16-token spans (`fixed_spans`), and spans
+are kept whole. Position zero (the attention sink) and the forty latent rows
+the worker rolled after its prompt are always kept.
 
-## Package layout
+### Stream weights
 
-```text
-src/rcc/
-|-- transport.py          # Routing, budgets, validation and delivery
-|-- message.py            # Payload representations
-|-- latent.py             # Optional continuous rollout
-|-- selectors/
-|   |-- __init__.py        # Selector callable type and public exports
-|   |-- cacheback.py       # Default selection function
-|   |-- fixed_spans.py     # Span selection
-|   |-- core/             # Tensor and cache helpers
-|   `-- query_support/    # CacheBack attention capture and scoring
-|-- vllm.py               # Existing-agent state adapter
-`-- capture/              # vLLM pages, connector and weight views
-```
+The released Gemma configurations score positions using global-attention
+layers only. The library also supports variants that include sliding layers;
+the weighting and folding rules below describe those additional variants.
 
-## CacheBack default
+A layer's support moments are sums over its key-value streams, and a hybrid
+model does not give every layer the same number of them: at the pinned Gemma
+revision the sliding layers carry eight and the global layers one. Adding the
+layers up untouched would therefore weight each one by its stream count instead
+of counting it once, so every layer is rescaled to the largest stream
+population before the sum. On a model whose layers all carry the same number,
+every weight is one and the arithmetic is unchanged to the bit. The
+order-infinity moments are maxima over streams rather than sums, so they are
+left alone.
 
-CacheBack scores each sender's state against the receiver's request. It runs
-one query-support capture over a cache copy and leaves the original intact.
-The receiver prefills selected input rows into its own cache. Capture requires
-the sender state plus request to fit the model's context limit.
+### Sliding-layer folds
 
-The default is the paper's `support-p2-a2` setting, with order `p = 2` and dose
-`alpha = 2`. Attention from the request supplies three quantities:
+At the pinned Gemma revision 8 of the 48 layers attend to the whole context and
+the other 40 attend only inside a 1024-token window. Both banked variants count
+the votes those 40 layers cast, and they differ only in how those votes are
+added up. The tail variant (`slidetail`) sums them, so a position near the end
+of the context can collect votes from all 48 layers while a position deep in it
+collects 8. The normalised variant (`slidenorm`) averages over the layers that
+actually cover each position, which divides that coverage back out; it is the
+control for recency bias, and a position inside one sliding window is divided
+by 9, that layer plus the 8 global ones, not by 48.
 
-- `snap`: attention mass averaged over request rows and query heads, summed
-  over layers, and max-pooled with a seven-position kernel.
-- `energy`: attention averaged across request rows before pooling and squaring,
-  with grouped-query heads averaged within each KV head.
-- `row_energy`: attention pooled and squared separately for each request row,
-  then averaged, retaining evidence important to individual request tokens.
+Dividing every moment by the same per-position coverage leaves the support
+correction unchanged, since it is a ratio of two moments that both scale, and
+rescales the attention-mass vote alone. The division has to happen on the raw
+per-position sums, before they are pooled, because a maximum pool and a
+division do not commute at a window boundary: pooling first would carry a
+neighbour's larger raw sum into a position and then divide it by that
+position's own smaller coverage. The moments are divided as well, and for them
+the order does not matter, because they are pooled when they are captured and
+only summed here.
 
-CacheBack multiplies `snap` by `(row_energy / energy) ** 2`. The ratio is computed
-in float32; positions with both energies zero receive a neutral correction of
-one. The public adapter currently supports dense Qwen3. Other model families
-and the paper's comparison methods remain in the replication snapshot.
+## Baselines
 
-## Position budget
+`baselines/` holds ports of the established cache-eviction scorers the paper
+compares against on the same span schedule and budgets: H2O (accumulated
+attention mass), StreamingLLM (recency), ChunkKV, and KVzip; SnapKV, with and
+without the query rows, is in `scorers.py`. Mean query attention is CacheBack
+without the support correction. Internal keys such as `snap` and `qsnap` retain
+their original names for compatibility with recorded data.
+Each baseline is scored by the same fixed-span keep law so the comparison
+changes only the score.
 
-CacheBack ranks fixed spans of `span_size=16` positions (W=16) by their mean score.
-To try W=4, configure the selector with the standard library:
+## Attention-vote and gradient scorers
 
-```python
-from functools import partial
-from rcc.selectors import cacheback
+`scorers.py` holds three scorers that run outside the CacheBack capture and
+score a context on their own. The two attention-vote scorers sum the attention
+each context position receives over the layers and average it over the heads,
+giving one score vector for the whole context; because they read the model's
+attention maps, the model has to be loaded with eager attention, since the
+faster attention kernels return no maps at all. `grad_scores` reads gradients
+instead and runs under any attention implementation.
 
-transfer(senders, receivers, requests, selector=partial(cacheback, span_size=4))
-```
+### Query-aware attention votes
 
-`span_size` must be a positive integer. It changes selection granularity, not
-the `ratio` or `budget`. W=4 has CPU coverage; no GPU or quality claim is made.
-The first source position and the sender-declared final `latent_steps` positions are
-protected and count toward the budget. The last span may contribute a contiguous
-partial window to fill the selected count exactly.
-Selected rows retain their original order. A budget smaller than the protected
-positions is rejected.
+`snapkv_query_scores` locates the question as an exact contiguous subsequence
+of the decode prompt so that only the bare-question rows vote: the chat
+template boilerplate around the question votes generically and dilutes the
+context signal. If the exact match fails and the question has more than two
+tokens, the search retries with the interior tokens `question_ids[1:-1]`,
+since the template boundary can absorb the first and last question token. If
+that also fails, all prompt rows vote.
 
-The default relative `r4` count is `I + ceil((T - I) / 4)`, where `T` is the
-sender's total positions and `I` is its declared inherited prefix length.
-Set `ratio=r` to choose another compression factor. The bounded alternative,
-`budget=B`, selects `min(B, T)` positions. Both rerank the whole input, so the
-inherited prefix changes the relative count without protecting those positions.
+### Self-interrogation votes
 
-Set `SenderState.latent_steps` to the number already produced by the existing
-agent. Additional rollout is opt-in through `transfer(..., latent_steps=G)`.
-With `"full"` or `"full_with_request"`, selection sees the extended state. With
-`"selected"` or `"selected_with_request"`, the selector receives the budget minus
-the `G` rows generated afterward. Both timings count the additional rows in the
-message allowance.
-See [latent rollout](api.md#latent-rollout) for conditioning and receiver-side use.
-The paper's forty-step configuration is a replication setting, not an API default.
+`selfq_scores` is the query-agnostic scorer for the store setting, where there
+is no user query at encode time. The model greedy-generates `n_questions`
+short factual questions the context answers, and one eager forward over
+`[context | questions]` sums the attention those probe rows send onto the
+context columns. When generation yields nothing, a single generic probe stands
+in so the forward always has voting rows.
 
-See [the API guide](api.md) for payload representations and
-[the replication guide](replication.md) for baseline selectors, KV transforms,
-capture-bank replay and benchmark settings on `paper`.
+### Gradient attribution
+
+`grad_scores` is a first-order attribution of a query-conditioned answer
+log-likelihood to each cached column. The context is prefilled once, the model
+greedy-decodes a short answer draft from the prompt, and one backward pass
+over the teacher-forced draft log-likelihood gives the gradient with respect
+to the cached keys and values. The per-column score is gradient times
+activation, the first-order change in the draft likelihood from zeroing that
+column, summed over layers and heads, keys plus values. In fp16 the gradients
+can underflow to an all-zero score and a warning; bf16 and fp32 are safe.

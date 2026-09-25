@@ -1,0 +1,15 @@
+# ministral3-14b: FanOutQA on the natural fifty-question panel: three workers per item carry real page text, the receiver answers each item three times per arm.
+# Run with: python -m rcc.run.entry --config configs/ministral-fanoutqa-natural-dev50.toml --bundle <bundle dir>
+schema_version = 1
+model = "ministral3-14b"
+benchmark = "fanoutqa-natural-dev50"
+topology = "fanout-m3"
+arm_profile = "fanoutqa-m3-12arm-full-sealed"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "ministral-fanoutqa-natural-dev50"
+root = "runs"

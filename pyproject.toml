@@ -5,18 +5,23 @@ build-backend = "hatchling.build"
 [project]
 name = "rcc"
 version = "0.1.0"
-description = "CacheBack: receiver-conditioned state transport between agents"
+description = "Receiver-conditioned latent communication between agents: score the worker's KV cache against the receiver's query, send just enough state"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 dependencies = [
   "torch>=2.2",
-  "transformers>=4.57.1,<6",
+  "transformers>=5.13,<5.14",
+  "accelerate>=1.14,<1.15",
+  "huggingface_hub>=0.35",
+  "mistral-common>=1.5",
+  "tomli>=2.0; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
-# The paper branch carries the separate vLLM environments for replication.
-dev = ["ruff==0.15.20", "pyright==1.1.411", "pytest>=8.0"]
+# The benchmark runners serve through vLLM; the two measured stacks are pinned
+# under requirements/, one file per stack.
+dev = ["ruff==0.15.20", "pytest>=8.0"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rcc"]
@@ -27,20 +32,18 @@ src = ["src", "tests"]
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "W", "F", "I", "B", "UP", "D", "N", "RUF", "SIM", "S105", "S106", "S107", "S602", "S604", "S605", "S609", "T201"]
+select = ["E", "W", "F", "I", "B", "UP", "D", "N", "RUF", "SIM"]
 ignore = ["D203", "D213", "SIM105", "SIM102", "SIM108", "SIM103", "SIM118"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
-"scripts/*" = ["D", "T201"]
-"examples/*" = ["T201"]
+"experiments/*" = ["D"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.pyright]
 include = ["src/rcc"]
-strict = ["src/rcc"]
 pythonVersion = "3.10"
 venvPath = "."
 venv = ".venv"

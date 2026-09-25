@@ -1,0 +1,15 @@
+# The serving stack the paper measured Gemma 4, Ministral 3, and Nemotron
+# Nano 2 on (CUDA 13.0 wheels; the node needs a CUDA 13 driver). Install this
+# file into its own environment, then the package with
+# `pip install -e . --no-deps`.
+--extra-index-url https://download.pytorch.org/whl/cu130
+vllm==0.26.0
+torch==2.11.0+cu130
+transformers==5.13.0
+tokenizers==0.22.2
+accelerate==1.14.0
+kernels==0.15.2
+huggingface_hub==1.10.1
+tqdm==4.67.1
+mistral-common[image]==1.11.7
+tomli>=2.0; python_version < "3.11"

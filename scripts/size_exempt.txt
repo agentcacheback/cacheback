@@ -1,2 +1,0 @@
-demo/trace-w4.json : recorded Qwen3-8B demo data, not source
-demo/trace.json : recorded Qwen3-8B demo data, not source

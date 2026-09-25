@@ -1,250 +1,146 @@
-"""Optional latent rollout through selection, both payloads and native receiver continuation."""
-
-from dataclasses import replace
-from itertools import product
-from typing import Any
+"""The latent rollout: the embeds-prefix path every family's producer rolls."""
 
 import pytest
 import torch
-import torch.nn.functional as functional
+from tests.conftest import random_ids
 
-from rcc import Delivery, SenderState, rollout, transfer
-from rcc.selectors import cacheback
-from rcc.selectors.core.kernels import cache_kv
+from rcc.latent.cache import cache_kv, cache_length
+from rcc.latent.embeds import latent_rollout_embeds
+from rcc.latent.rollout import build_realign, latent_rollout
 
 
-@torch.inference_mode()
-def _reference(state: SenderState, steps: int, request: torch.Tensor | None = None) -> SenderState:
-    model = state.model
-    rows = state.input_embeds[None]
-    prefix = (
-        rows if request is None else torch.cat((rows, model.get_input_embeddings()(request)), 1)
+def _embed(model, ids):
+    with torch.no_grad():
+        return model.get_input_embeddings()(ids)
+
+
+def _greedy_decode(model, probe_ids, probe_mask, past, *, max_new_tokens):
+    """Greedy-decode `max_new_tokens` ids on top of `past`, space-joined."""
+    past_length = cache_length(past)
+    total = past_length + int(probe_ids.shape[1])
+    mask = torch.cat(
+        [torch.ones(1, past_length, dtype=probe_mask.dtype, device=probe_ids.device), probe_mask],
+        dim=1,
     )
-    target = model.get_input_embeddings().weight.float().norm(dim=-1).mean()
-    thoughts = []
-    for _ in range(steps):
-        hidden = model.model(inputs_embeds=prefix, use_cache=False).last_hidden_state[:, -1:]
-        thought = functional.normalize(hidden, dim=-1, eps=1e-6) * target.to(hidden)
-        thoughts.append(thought)
-        prefix = torch.cat((prefix, thought), 1)
-    rows = torch.cat((rows, *thoughts), 1)
-    output = model.model(inputs_embeds=rows, use_cache=True)
-    ids = state.token_ids
-    if ids is not None:
-        ids = torch.cat((ids, ids.new_full((steps,), -1)))
-    return replace(
-        state,
-        input_embeds=rows[0],
-        past_key_values=output.past_key_values,
-        token_ids=ids,
-        latent_steps=state.latent_steps + steps,
-    )
-
-
-@torch.inference_mode()
-def _selected(state: SenderState, query: torch.Tensor, budget: int) -> SenderState:
-    keep = cacheback(state, query, budget)
-    rows = state.input_embeds[keep]
-    output = state.model.model(inputs_embeds=rows[None], use_cache=True)
-    return replace(
-        state,
-        input_embeds=rows,
-        past_key_values=output.past_key_values,
-        token_ids=state.token_ids[keep],
-        latent_steps=0,
-        inherited_positions=0,
-    )
-
-
-def test_latent_handoffs_and_receiver_rollout_match_full_forward_reference(
-    senders: list[SenderState],
-    monkeypatch: Any,
-) -> None:
-    snapshots = [[(k.clone(), v.clone()) for k, v in cache_kv(s.past_key_values)] for s in senders]
-    queries = ["Who owns Cedar ?", "When Birch launches ?"]
-    steps = 3
-    for context, bounded in product(
-        ("full", "full_with_request", "selected", "selected_with_request"), (False, True)
-    ):
-        inboxes: list[list[Delivery]] = [[], []]
-        options = {"budget": 35} if bounded else {}
-        latent_options = {} if context == "full" else {"latent_context": context}
-        transfer(
-            senders,
-            [inbox.append for inbox in inboxes],
-            queries,
-            latent_steps=steps,
-            **latent_options,
-            **options,
-        )
-        mixed: list[Delivery] = []
-        with pytest.warns(UserWarning, match="untested"):
-            transfer(
-                senders,
-                mixed.append,
-                queries,
-                representation="token_ids+continuous",
-                latent_steps=steps,
-                latent_context=context,
-                **options,
+    kwargs = {
+        "input_ids": probe_ids,
+        "attention_mask": mask,
+        "past_key_values": past,
+        "max_new_tokens": max_new_tokens,
+        "do_sample": False,
+    }
+    with torch.no_grad():
+        try:
+            out = model.generate(
+                **kwargs,
+                cache_position=torch.arange(past_length, total, device=probe_ids.device),
             )
-        assert inboxes[0] == inboxes[1]
-        assert len(mixed) == len(inboxes[0]) == 2
-        for index, delivery in enumerate(inboxes[0]):
-            expected = []
-            for state, message in zip(senders, delivery.messages, strict=True):
-                query = state.request_ids(delivery.request)
-                prompt = (
-                    query if context in ("full_with_request", "selected_with_request") else None
-                )
-                count = 35 if bounded else (state.input_embeds.shape[0] + steps + 3) // 4
-                if context in ("full", "full_with_request"):
-                    grown = _reference(state, steps, prompt)
-                    wanted = grown.input_embeds[cacheback(grown, query, count)]
-                else:
-                    selected = _selected(state, query, count - steps)
-                    wanted = _reference(selected, steps, prompt).input_embeds
-                assert message.positions == count
-                torch.testing.assert_close(message.continuous_rows, wanted, rtol=1e-5, atol=1e-6)
-                expected.append(wanted)
-            model = senders[0].model
-            weight = model.get_input_embeddings().weight
-            received = delivery.for_hf(weight)["inputs_embeds"]
-            mixed_rows = mixed[index].for_hf(weight)["inputs_embeds"]
-            assert torch.equal(received, mixed_rows)
-            assert all(
-                bool((message.token_ids[-steps:] == -1).all()) for message in mixed[index].messages
-            )
-            with torch.inference_mode():
-                query = senders[0].request_ids(delivery.request)
-                cached = model.model(inputs_embeds=received, use_cache=True)
-                actual = model(input_ids=query, past_key_values=cached.past_key_values)
-                joined = torch.cat((*expected, model.get_input_embeddings()(query)[0]))[None]
-                native = model(inputs_embeds=joined)
-                torch.testing.assert_close(
-                    actual.logits[:, -1], native.logits[:, -1], rtol=1e-5, atol=1e-6
-                )
-
-    state = replace(senders[0], inherited_positions=20)
-    for context in ("full", "selected"):
-        inherited: list[Delivery] = []
-        transfer(state, inherited.append, queries[0], latent_steps=steps, latent_context=context)
-        assert inherited[0].messages[0].positions == 37
-    for request in (None, state.request_ids(queries[0])):
-        grown = rollout(state, steps=steps, request=request)
-        expected_state = _reference(state, steps, request)
-        assert grown.inherited_positions == 20 and grown.latent_steps == 5
-        assert grown.input_embeds.shape[0] == state.input_embeds.shape[0] + steps
-        torch.testing.assert_close(
-            grown.input_embeds, expected_state.input_embeds, rtol=1e-5, atol=1e-6
-        )
-        for actual, expected_kv in zip(
-            cache_kv(grown.past_key_values), cache_kv(expected_state.past_key_values), strict=True
-        ):
-            for actual_tensor, expected_tensor in zip(actual, expected_kv, strict=True):
-                torch.testing.assert_close(actual_tensor, expected_tensor, rtol=1e-5, atol=1e-6)
-
-    # The receiver owns its prompt and can use the same helper after delivery.
-    rows = inboxes[0][0].for_hf(state.model.get_input_embeddings().weight)["inputs_embeds"]
-    with torch.inference_mode():
-        output = state.model.model(inputs_embeds=rows, use_cache=True)
-    receiver = SenderState(state.model, output.past_key_values, rows[0], tokenizer=state.tokenizer)
-    receiver = rollout(receiver, steps=steps, request=queries[0])
-    with torch.inference_mode():
-        query = state.request_ids(queries[1])
-        actual = state.model(input_ids=query, past_key_values=receiver.past_key_values)
-        native = state.model(
-            inputs_embeds=torch.cat(
-                (receiver.input_embeds, state.model.get_input_embeddings()(query)[0])
-            )[None]
-        )
-        torch.testing.assert_close(actual.logits[:, -1], native.logits[:, -1], rtol=1e-5, atol=1e-6)
-
-    import rcc.transport as transport
-
-    observed = []
-
-    def record(state: SenderState, **kwargs: Any) -> SenderState:
-        observed.append(state)
-        return rollout(state, **kwargs)
-
-    with monkeypatch.context() as patch:
-        patch.setattr(transport, "rollout", record)
-        transfer(senders, [].append, queries, latent_steps=steps)
-    assert len(observed) == 2 and all(a is b for a, b in zip(observed, senders, strict=True))
-
-    for state, snapshot in zip(senders, snapshots, strict=True):
-        for actual, expected_kv in zip(cache_kv(state.past_key_values), snapshot, strict=True):
-            assert all(torch.equal(a, b) for a, b in zip(actual, expected_kv, strict=True))
+        except (TypeError, ValueError):
+            out = model.generate(**kwargs)
+    return " ".join(str(int(token)) for token in out[0, int(probe_ids.shape[1]) :])
 
 
-def test_latent_options_fail_before_delivery_and_zero_preserves_existing_path(
-    senders: list[SenderState],
-    monkeypatch: Any,
-) -> None:
-    state = senders[0]
-    before = [(k.clone(), v.clone()) for k, v in cache_kv(state.past_key_values)]
-    query = "Who owns Cedar ?"
-    inbox: list[Delivery] = []
-    for options in (
-        {"latent_steps": -1},
-        {"latent_steps": True},
-        {"latent_steps": 1.5},
-        {"latent_context": "after"},
-        {"latent_context": "prompt_and_request"},
-        {"latent_steps": 35, "latent_context": "selected", "budget": 35},
-        {"latent_steps": 440, "ratio": 1},
-    ):
-        with pytest.raises(ValueError):
-            transfer(senders, inbox.append, query, **options)
-    assert inbox == []
-    for steps in (-1, True, 1.5, 440):
-        with pytest.raises(ValueError):
-            rollout(state, steps=steps)
-    with pytest.raises(ValueError):
-        rollout(state, steps=1, request=torch.ones((1, 440), dtype=torch.long))
+def test_matches_ids_rollout_when_prefix_is_embedded_ids(tiny_model):
+    prefix_ids = random_ids(14, seed=31)
+    prompt_ids = random_ids(9, seed=32)
+    realign = build_realign(tiny_model, enabled=False)
+    ref = latent_rollout(
+        tiny_model,
+        torch.cat([prefix_ids, prompt_ids], dim=1),
+        latent_steps=3,
+        realign=realign,
+        record_embeds=True,
+    )
+    got = latent_rollout_embeds(
+        tiny_model,
+        _embed(tiny_model, prefix_ids),
+        prompt_ids,
+        latent_steps=3,
+        realign=realign,
+        record_embeds=True,
+    )
+    assert cache_length(got.past) == cache_length(ref.past) == 14 + 9 + 3
+    for (k0, v0), (k1, v1) in zip(cache_kv(ref.past), cache_kv(got.past), strict=True):
+        assert torch.allclose(k0, k1, atol=1e-6)
+        assert torch.allclose(v0, v1, atol=1e-6)
+    assert ref.embeds is not None and got.embeds is not None
+    assert torch.allclose(ref.embeds, got.embeds, atol=1e-6)
 
-    def fail(*args: Any, **kwargs: Any) -> None:
-        raise RuntimeError("rollout failed")
 
-    with monkeypatch.context() as patch:
-        patch.setattr(state.model.model, "forward", fail)
-        assert rollout(state, steps=0) is state
-        transfer(state, inbox.append, query, ratio=1, latent_steps=0, latent_context="selected")
-        with pytest.raises(RuntimeError, match="rollout failed"):
-            transfer(state, inbox.append, query, ratio=1, latent_steps=1)
-    assert len(inbox) == 1
-    assert torch.equal(inbox[0].messages[0].continuous_rows, state.input_embeds)
+def test_kept_subset_prefix_rolls_at_dense_positions(tiny_model):
+    """A kept-subset handoff occupies dense fresh positions.
 
-    original = state.model.model.forward
-    calls = 0
-
-    def interrupt(*args: Any, **kwargs: Any) -> Any:
-        nonlocal calls
-        calls += 1
-        if calls == 2:
-            raise RuntimeError("rollout interrupted")
-        return original(*args, **kwargs)
-
-    with monkeypatch.context() as patch:
-        patch.setattr(state.model.model, "forward", interrupt)
-        with pytest.raises(RuntimeError, match="rollout interrupted"):
-            transfer(state, inbox.append, query, latent_steps=2, latent_context="full_with_request")
-    assert len(inbox) == 1
-    for actual, expected in zip(cache_kv(state.past_key_values), before, strict=True):
-        assert all(torch.equal(a, b) for a, b in zip(actual, expected, strict=True))
-
-    def underfill(sender: SenderState, ids: torch.Tensor, budget: int) -> list[int]:
-        assert torch.is_grad_enabled() and not torch.is_inference_mode_enabled()
-        return [0, sender.input_embeds.shape[0] - 1]
-
-    transfer(
-        state,
-        inbox.append,
-        query,
-        budget=10,
-        selector=underfill,
+    The cache equals an ids rollout over the same surviving rows, not over the
+    original gapped sequence, because the embeds channel has no relocation.
+    """
+    source_ids = random_ids(20, seed=33)
+    keep = [0, 2, 3, 9, 10, 11, 17]
+    prompt_ids = random_ids(6, seed=34)
+    realign = build_realign(tiny_model, enabled=False)
+    kept_embeds = _embed(tiny_model, source_ids)[:, keep, :]
+    got = latent_rollout_embeds(
+        tiny_model, kept_embeds, prompt_ids, latent_steps=2, realign=realign
+    )
+    ref = latent_rollout(
+        tiny_model,
+        torch.cat([source_ids[:, keep], prompt_ids], dim=1),
         latent_steps=2,
-        latent_context="selected",
+        realign=realign,
     )
-    assert inbox[-1].messages[0].positions == 4
+    for (k0, v0), (k1, v1) in zip(cache_kv(ref.past), cache_kv(got.past), strict=True):
+        assert torch.allclose(k0, k1, atol=1e-6)
+        assert torch.allclose(v0, v1, atol=1e-6)
+
+
+def test_empty_prefix_reduces_to_plain_rollout(tiny_model):
+    prompt_ids = random_ids(11, seed=35)
+    realign = build_realign(tiny_model, enabled=False)
+    empty = torch.zeros(1, 0, _embed(tiny_model, prompt_ids).shape[-1])
+    got = latent_rollout_embeds(tiny_model, empty, prompt_ids, latent_steps=2, realign=realign)
+    ref = latent_rollout(tiny_model, prompt_ids, latent_steps=2, realign=realign)
+    for (k0, v0), (k1, v1) in zip(cache_kv(ref.past), cache_kv(got.past), strict=True):
+        assert torch.allclose(k0, k1, atol=1e-6)
+        assert torch.allclose(v0, v1, atol=1e-6)
+
+
+def test_produced_cache_decodes_and_thought_embeds_recorded(tiny_model):
+    prefix_ids = random_ids(8, seed=36)
+    prompt_ids = random_ids(5, seed=37)
+    realign = build_realign(tiny_model, enabled=False)
+    out = latent_rollout_embeds(
+        tiny_model,
+        _embed(tiny_model, prefix_ids),
+        prompt_ids,
+        latent_steps=3,
+        realign=realign,
+        record_embeds=True,
+    )
+    assert out.embeds is not None and out.embeds.shape[1] == 8 + 5 + 3
+    assert not torch.allclose(out.embeds[:, -1, :], _embed(tiny_model, prompt_ids)[:, -1, :]), (
+        "thought rows must be realigned hidden states, not prompt embeddings"
+    )
+    probe = random_ids(4, seed=38)
+    mask = torch.ones(1, 4, dtype=torch.long)
+    decoded = _greedy_decode(tiny_model, probe, mask, out.past, max_new_tokens=6)
+    assert len(decoded.split()) == 6
+
+
+def test_rejects_batched_or_empty_prompts(tiny_model):
+    realign = build_realign(tiny_model, enabled=False)
+    good_prefix = _embed(tiny_model, random_ids(4, seed=39))
+    with pytest.raises(ValueError, match="batch-1"):
+        latent_rollout_embeds(
+            tiny_model,
+            good_prefix,
+            torch.zeros(1, 0, dtype=torch.long),
+            latent_steps=1,
+            realign=realign,
+        )
+    with pytest.raises(ValueError, match="prefix_embeds"):
+        latent_rollout_embeds(
+            tiny_model,
+            good_prefix[0],
+            random_ids(3, seed=40),
+            latent_steps=1,
+            realign=realign,
+        )

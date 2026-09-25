@@ -1,0 +1,15 @@
+# gemma4-12b-it: FanOutQA on the natural fifty-question panel: three workers per item carry real page text, the receiver answers each item three times per arm.
+# Run with: python -m rcc.run.entry --config configs/gemma-fanoutqa-natural-dev50.toml --bundle <bundle dir>
+schema_version = 1
+model = "gemma4-12b-it"
+benchmark = "fanoutqa-natural-dev50"
+topology = "fanout-m3"
+arm_profile = "gemma-natural-dev50-12arm-native-v1"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "gemma-fanoutqa-natural-dev50"
+root = "runs"

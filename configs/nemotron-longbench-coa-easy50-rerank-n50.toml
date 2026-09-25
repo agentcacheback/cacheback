@@ -1,0 +1,15 @@
+# nemotron-nano-12b-v2: LongBench v2 chain of agents on the easy fifty: four hops over one document, three samples per item and arm. The latent arms carry a re-ranked memory: every hop keeps one row in r of what it has seen.
+# Run with: python -m rcc.run.entry --config configs/nemotron-longbench-coa-easy50-rerank-n50.toml --bundle <bundle dir>
+schema_version = 1
+model = "nemotron-nano-12b-v2"
+benchmark = "longbench-v2-coa-nemotron-easy50-rerank-sealed"
+topology = "chain-t4"
+arm_profile = "longbench-coa-rerank-6arm-v1"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "nemotron-longbench-rerank"
+root = "runs"

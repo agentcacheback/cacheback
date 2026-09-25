@@ -1,0 +1,26 @@
+# The judger ablation on the natural-content panel. Everything is the natural
+# run (same panel, arms, placements, seeds, worker prompts, receiver prompt)
+# except the question the selector's judger carries: the receiver prefix is
+# appended to each rolled worker cache and only its question rows are run with
+# attention capture, and their attention over the worker's rows is the keep.
+# Here those rows spell a fixed unrelated question, so the handoff is selected
+# on nonsense-question attention while every worker reads the real question and
+# the receiver answers the real question. It isolates whether the semantic
+# content of the receiver query improves which sender positions are selected.
+# Run with: python -m rcc.run.entry --config configs/qwen-fanoutqa-natural-dev50-judger-ablation.toml --bundle <bundle dir>
+schema_version = 1
+model = "qwen3-8b"
+benchmark = "fanoutqa-natural-dev50"
+topology = "fanout-m3"
+arm_profile = "fanoutqa-m3-11arm-sealed"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "qwen-fanoutqa-natural-dev50-judger"
+root = "runs"
+
+[ablation]
+judger_question = "Why was Le Chaton Fat denied a small-business loan?"

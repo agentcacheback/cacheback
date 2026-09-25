@@ -1,16 +1,46 @@
-"""Native models and distinct sender states for complete offline handoff scenarios."""
-
 from typing import Any
 
 import pytest
 import torch
-from tokenizers import Tokenizer, models, pre_tokenizers
-from transformers import PreTrainedTokenizerFast, Qwen3Config, Qwen3ForCausalLM
+from transformers import Qwen3Config, Qwen3ForCausalLM
 
-from rcc import SenderState
+from rcc import KVCache
+
+TINY_VOCAB = 512
 
 
-def tiny_config(attn_implementation: str = "sdpa") -> Qwen3Config:
+def make_cache(
+    layers: int = 2,
+    kv_heads: int = 2,
+    length: int = 8,
+    head_dim: int = 4,
+    dtype: torch.dtype = torch.float16,
+    seed: int = 0,
+) -> KVCache:
+    gen = torch.Generator().manual_seed(seed)
+    shape = (layers, kv_heads, length, head_dim)
+    return KVCache(
+        keys=torch.randn(shape, generator=gen).to(dtype),
+        values=torch.randn(shape, generator=gen).to(dtype),
+        positions=torch.arange(length, dtype=torch.int64),
+    )
+
+
+def random_ids(length: int = 12, seed: int = 0, vocab: int = TINY_VOCAB) -> torch.Tensor:
+    """A [1, length] batch of random token ids for the tiny model (no tokenizer needed)."""
+    gen = torch.Generator().manual_seed(seed)
+    return torch.randint(0, vocab, (1, length), generator=gen)
+
+
+def prefill(model: Any, length: int = 12) -> Any:
+    """Prefill one tiny model over deterministic ids and return its cache."""
+    ids = random_ids(length=length, seed=410)
+    with torch.no_grad():
+        return model(input_ids=ids, use_cache=True, return_dict=True).past_key_values
+
+
+def tiny_config(attn_implementation: str = "eager") -> Qwen3Config:
+    """The one tiny Qwen3 config; tests that need a non-eager model vary only the impl."""
     return Qwen3Config(
         hidden_size=64,
         intermediate_size=128,
@@ -18,52 +48,14 @@ def tiny_config(attn_implementation: str = "sdpa") -> Qwen3Config:
         num_attention_heads=4,
         num_key_value_heads=2,
         head_dim=16,
-        vocab_size=512,
-        max_position_embeddings=512,
+        vocab_size=TINY_VOCAB,
+        max_position_embeddings=256,
         attn_implementation=attn_implementation,
     )
 
 
-@pytest.fixture
-def model() -> Any:
-    with torch.random.fork_rng():
-        torch.manual_seed(17)
-        return Qwen3ForCausalLM(tiny_config()).eval()
-
-
-@pytest.fixture
-def senders(model: Any) -> list[SenderState]:
-    vocabulary = {
-        word: i
-        for i, word in enumerate(
-            ["[UNK]", "Who", "owns", "Cedar", "When", "Birch", "launches", "?"]
-        )
-    }
-    unknown = "[UNK]"
-    backend = Tokenizer(models.WordLevel(vocabulary, unk_token=unknown))
-    backend.pre_tokenizer = pre_tokenizers.Whitespace()
-    tokenizer = PreTrainedTokenizerFast(tokenizer_object=backend, unk_token=unknown)
-    states = []
-    with torch.inference_mode():
-        for offset, length in ((10, 80), (200, 96)):
-            ids = torch.arange(offset, offset + length)[None]
-            rows = model.get_input_embeddings()(ids)
-            out = model.model(inputs_embeds=rows, use_cache=True)
-            # The existing agent owns its two latent steps and records the actual input rows.
-            for _ in range(2):
-                thought = out.last_hidden_state[:, -1:]
-                rows = torch.cat((rows, thought), dim=1)
-                out = model.model(
-                    inputs_embeds=thought, past_key_values=out.past_key_values, use_cache=True
-                )
-            states.append(
-                SenderState(
-                    model,
-                    out.past_key_values,
-                    rows[0],
-                    tokenizer=tokenizer,
-                    token_ids=torch.cat((ids[0], torch.tensor([-1, -1]))),
-                    latent_steps=2,
-                )
-            )
-    return states
+@pytest.fixture(scope="session")
+def tiny_model() -> Qwen3ForCausalLM:
+    """A tiny seeded Qwen3 on CPU with eager attention."""
+    torch.manual_seed(0)
+    return Qwen3ForCausalLM(tiny_config()).eval()

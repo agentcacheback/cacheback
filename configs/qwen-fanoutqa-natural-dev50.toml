@@ -1,0 +1,15 @@
+# qwen3-8b: FanOutQA on the natural fifty-question panel: three workers per item carry real page text, the receiver answers each item three times per arm.
+# Run with: python -m rcc.run.entry --config configs/qwen-fanoutqa-natural-dev50.toml --bundle <bundle dir>
+schema_version = 1
+model = "qwen3-8b"
+benchmark = "fanoutqa-natural-dev50"
+topology = "fanout-m3"
+arm_profile = "fanoutqa-m3-11arm-sealed"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "qwen-fanoutqa-natural-dev50"
+root = "runs"

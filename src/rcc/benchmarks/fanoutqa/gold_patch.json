@@ -1,0 +1,16 @@
+{
+  "schema": "fanoutqa-gold-patch-v1",
+  "panel": "fanoutqa-m3-natural-dev50",
+  "rule": "A FanOutQA reference string stands as the annotator typed it, except where it is misspelled (kind typo: replaced by the pinned page's spelling) or where the pinned evidence page states a different value for the asked fact (kind value: replaced by the page's literal string; kind drop: removed when the page contradicts the reference or does not state the fact). Derived from a complete audit of all 498 reference strings on the panel against their pinned pages (2026-09-08). No edit is made toward any model output.",
+  "entries": [
+    {"qid": "8e62c5c69ce8c58d", "leaf_index": 1, "original": "Thomas Clarence", "groups": [["Clarence Thomas"]], "kind": "typo", "page": "Supreme Court of the United States", "reason": "the reference transposes the name; every pinned page writes Clarence Thomas"},
+    {"qid": "9dbfeb76f11979c1", "leaf_index": 3, "original": "Massachussetts", "groups": [["Massachusetts"]], "kind": "typo", "page": "John Adams", "reason": "the reference misspells the state; every pinned page writes Massachusetts"},
+    {"qid": "98ced84a1a9df028", "leaf_index": 4, "original": "Terminator 2: Judgement Day", "groups": [["Terminator 2: Judgment Day"]], "kind": "typo", "page": "Terminator 2: Judgment Day", "reason": "the reference misspells the title; every pinned page writes Judgment"},
+    {"qid": "4a484ffa4676b4ce", "leaf_index": 9, "original": "John Tavares", "groups": [["Sheldon Keefe"]], "kind": "value", "page": "Toronto Maple Leafs", "reason": "the pinned infobox lists Head coach Sheldon Keefe and Captain John Tavares; the reference names the captain"},
+    {"qid": "95de313fdfef9d01", "leaf_index": 5, "original": "80", "groups": [["81"]], "kind": "value", "page": "Joe Biden", "reason": "the pinned infobox states (age 81); the reference value is stale against the pinned revision"},
+    {"qid": "98ced84a1a9df028", "leaf_index": 14, "original": "$90 million", "groups": [["$43-47 million"]], "kind": "value", "page": "The Abyss", "reason": "the pinned infobox Budget is $43 to 47 million; $90 million is the worldwide gross on the same page"},
+    {"qid": "d001e4f3d27fac66", "leaf_index": 2, "original": "German", "groups": [], "kind": "drop", "page": "Germany", "reason": "the question excludes EU members and the pinned page states Germany is an EU member, so no answer from the evidence can include German"},
+    {"qid": "d001e4f3d27fac66", "leaf_index": 3, "original": "Italian", "groups": [], "kind": "drop", "page": "Italy", "reason": "the question excludes EU members and the pinned page states Italy is an EU member, so no answer from the evidence can include Italian"},
+    {"qid": "50fa232e3f44887a", "leaf_index": 9, "original": "Soan River", "groups": [], "kind": "drop", "page": "Islamabad", "reason": "the pinned page says the city is drained by the Kurang River and mentions the Soan only for Stone Age finds; the fact is not stated by the evidence"}
+  ]
+}

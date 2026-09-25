@@ -1,0 +1,21 @@
+# The judger ablation on the seven support-latent arms alone: 1050 rows, the
+# floor and text arms left to the eleven-arm bank, which the ablation does not
+# move. Same panel, items, seeds, prompts, and decode as the eleven-arm natural
+# run; only the roster and the judger question differ.
+# Run with: python -m rcc.run.entry --config configs/qwen-fanoutqa-natural-dev50-latent-judger-ablation.toml --bundle <bundle dir>
+schema_version = 1
+model = "qwen3-8b"
+benchmark = "fanoutqa-natural-dev50-latent"
+topology = "fanout-m3"
+arm_profile = "fanoutqa-m3-7latent-sealed"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "qwen-fanoutqa-natural-dev50-latent-judger"
+root = "runs"
+
+[ablation]
+judger_question = "Why was Le Chaton Fat denied a small-business loan?"

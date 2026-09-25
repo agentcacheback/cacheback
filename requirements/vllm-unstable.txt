@@ -1,5 +1,0 @@
-# Experimental public adapter: lacks live GPU testing. Use a separate environment.
---extra-index-url https://download.pytorch.org/whl/cu130
-vllm==0.26.0
-torch==2.11.0+cu130
-transformers==5.13.0

@@ -1,0 +1,12 @@
+# The Qwen 3 serving stack the paper measured (CUDA 12.8 wheels). Install this
+# file into its own environment, then the package with
+# `pip install -e . --no-deps`. No huggingface_hub version was recorded.
+--extra-index-url https://download.pytorch.org/whl/cu128
+vllm==0.11.1
+torch==2.9.0+cu128
+transformers==4.57.1
+tokenizers==0.22.0
+accelerate>=1.14,<1.15
+huggingface_hub>=0.35
+mistral-common>=1.5
+tomli>=2.0; python_version < "3.11"

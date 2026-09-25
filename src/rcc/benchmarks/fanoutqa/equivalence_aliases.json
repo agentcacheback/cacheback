@@ -1,0 +1,18 @@
+{
+  "schema": "fanoutqa-equivalence-aliases-v1",
+  "policy": "complete-two-person-shared-surname-v1",
+  "entries": [
+    {
+      "qid": "445e0f67be85856c",
+      "leaf_index": 9,
+      "original": "Anthony Russo, Joe Russo",
+      "alternatives": [
+        "Anthony Russo and Joe Russo",
+        "Anthony and Joe Russo"
+      ],
+      "page": "Avengers: Endgame",
+      "evidence": "Directed by Anthony and Joe Russo",
+      "reason": "Both alternatives name both directors; neither accepts one director alone."
+    }
+  ]
+}

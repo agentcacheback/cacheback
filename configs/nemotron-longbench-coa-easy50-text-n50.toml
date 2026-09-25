@@ -1,0 +1,15 @@
+# nemotron-nano-12b-v2: LongBench v2 chain of agents on the easy fifty: four hops over one document, three samples per item and arm. The text arms rewrite a note at every hop; issue_only is the no-document floor.
+# Run with: python -m rcc.run.entry --config configs/nemotron-longbench-coa-easy50-text-n50.toml --bundle <bundle dir>
+schema_version = 1
+model = "nemotron-nano-12b-v2"
+benchmark = "longbench-v2-coa-nemotron-easy50-text-sealed"
+topology = "chain-t4"
+arm_profile = "longbench-coa-text-4arm-v1"
+
+[items]
+start = 0
+count = 50
+
+[output]
+run_label = "nemotron-longbench-text"
+root = "runs"
