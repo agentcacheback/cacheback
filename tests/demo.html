@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Demo replay check</title>
+<p id="result" hidden></p>
+<iframe title="Demo under test" style="width:100%;height:900px;border:0"></iframe>
+<script type="module">
+  const frame = document.querySelector("iframe"), result = document.querySelector("#result");
+  const assert = (value, message) => { if (!value) throw new Error(message); };
+  const plain = text => text.replace(/\*\*([^*\n]+)\*\*/g, "$1");
+  try {
+    await new Promise(resolve => { frame.onload = resolve; frame.src = "../demo/"; });
+    const win = frame.contentWindow, doc = frame.contentDocument;
+    const play = doc.querySelector("#play"), speed = doc.querySelector("#speed"), clear = doc.querySelector("#clear");
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => { observer.disconnect(); reject(new Error("Demo did not load")); }, 5000);
+      const observer = new MutationObserver(() => {
+        if (!play.disabled) { clearTimeout(timeout); observer.disconnect(); resolve(); }
+      });
+      observer.observe(play, {attributes:true});
+      if (!play.disabled) { clearTimeout(timeout); observer.disconnect(); resolve(); }
+    });
+    const trace = await (await fetch("../demo/trace-w4.json")).json(), recorded = trace.cases[0];
+    const style = doc.createElement("style");
+    style.textContent = ".chunk:not(.source) {height:48px}"; doc.head.append(style);
+    let next;
+    win.requestAnimationFrame = callback => { next = callback; return 1; };
+    win.cancelAnimationFrame = () => { next = null; };
+    Object.defineProperty(win.performance, "now", {value:() => 0});
+    assert(doc.querySelectorAll("button").length === 2 && [...speed.options].map(option => option.value).join() === "1,2,4", "Only playback, clear and speed controls");
+    assert(speed.value === "1", "Recorded speed is the default");
+    assert(doc.querySelectorAll(".topology li").length === 4, "Four-agent topology");
+    for (const rate of [1, 2, 4, 1]) {
+      speed.value = String(rate); speed.dispatchEvent(new win.Event("change"));
+      const ends = {};
+      for (const method of ["rclc", "text"]) {
+        let sum = 0;
+        ends[method] = recorded[method].hops.map(hop => (sum += hop.seconds) * 1000).concat(recorded[method].seconds * 1000).map(ms => ms / rate);
+      }
+      const samples = [0, ...Object.values(ends).flatMap(times => times.flatMap((end, i) => [Math.max(0,end - 1),end + 1,(end + (times[i - 1] || 0)) / 2]))].sort((a,b) => a-b);
+      next = null; play.click();
+      for (const elapsed of samples) {
+        if (next) { const tick = next; next = null; tick(elapsed); }
+        for (const method of ["rclc", "text"]) {
+          const row = doc.querySelector(`#${method}-row`), run = recorded[method];
+          const complete = ends[method].filter(end => elapsed >= end).length;
+          assert(row.children.length === 4, "All chunks remain visible");
+          if (method === "rclc") {
+            trace.sources.forEach((source,i) => assert(row.children[i].textContent === source.text, "Source text is unchanged"));
+            assert(Boolean(row.querySelector("mark")) === (complete > 0), "Highlights start at the recorded handoff");
+          }
+          for (let i = method === "rclc" ? 3 : 0; i < 4; i++) {
+            const message = i === 3 ? run.answer : run.hops[i].message;
+            const output = row.children[i].textContent, expected = plain(message.text);
+            if (complete > i) assert(output.startsWith(expected), "Completed output matches recording");
+            else if (complete === i) {
+              assert(expected.startsWith(output), "Streaming is a verbatim prefix");
+              if (elapsed > (ends[method][i - 1] || 0) + 1) assert(output.length > 0 && output.length < expected.length, "Text streams before completion");
+            } else assert(output === "", "Future output stays hidden");
+            const chunk = row.children[i];
+            assert(Math.abs(chunk.scrollHeight - chunk.clientHeight - chunk.scrollTop) <= 1, "Generated text follows the newest line through completion");
+          }
+          if (complete === 4) assert(doc.querySelector(`#${method}-time`).textContent === `${run.seconds.toFixed(2)} s`, "Measured total time");
+        }
+        const finished = Object.values(ends).every(times => elapsed >= times[3]);
+        assert(play.disabled !== finished && speed.disabled !== finished, "Controls unlock only after both methods finish");
+      }
+      assert(play.textContent === "Replay", "Replay is available");
+    }
+    assert(!doc.querySelector(".answer-check"), "Unreviewed recordings are not labelled correct");
+    play.click(); next(250); clear.click();
+    assert(!next && !play.disabled && !speed.disabled && clear.hidden, "Clear cancels playback and restores controls");
+    assert(!doc.querySelector("mark") && !doc.querySelector("#text-row").textContent && !doc.querySelector(".answer").textContent, "Clear removes all output and highlights");
+    assert([...doc.querySelectorAll(".time")].every(node => !node.textContent) && play.textContent === "Run", "Clear resets clocks");
+    frame.style.width = "390px";
+    assert(doc.documentElement.scrollWidth === doc.documentElement.clientWidth, "Mobile page fits its viewport");
+    assert(doc.querySelector(".flow").scrollWidth > doc.querySelector(".flow").clientWidth, "Mobile topology scrolls as one diagram");
+    frame.style.width = "100%";
+    await new Promise(resolve => { frame.onload = resolve; win.location.reload(); });
+    const live = frame.contentDocument, livePlay = live.querySelector("#play");
+    await new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        if (!livePlay.disabled) { observer.disconnect(); resolve(); }
+      });
+      observer.observe(livePlay, {attributes:true});
+      if (!livePlay.disabled) { observer.disconnect(); resolve(); }
+    });
+    live.querySelector("#speed").value = "4"; livePlay.click();
+    await new Promise(resolve => setTimeout(resolve, Math.max(recorded.rclc.seconds, recorded.text.seconds) * 250 + 1000));
+    assert(!livePlay.disabled && livePlay.textContent === "Replay", "Native animation clock completes playback after testing");
+    for (const method of ["rclc", "text"]) assert(live.querySelector(`#${method}-row .answer`).textContent.startsWith(plain(recorded[method].answer.text)), "Real-time playback reaches both full answers");
+    live.querySelector("#clear").click(); live.querySelector("#speed").value = "1";
+    document.title = "Replay check passed";
+  } catch (error) {
+    result.hidden = false; result.textContent = `FAIL: ${error.message}`;
+    document.title = "Replay check failed"; throw error;
+  }
+</script>
+</html>

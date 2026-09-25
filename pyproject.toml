@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rcc"
+version = "0.1.0"
+description = "CacheBack: receiver-conditioned state transport between agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "torch>=2.2",
+  "transformers>=4.57.1,<6",
+]
+
+[project.optional-dependencies]
+# The paper branch carries the separate vLLM environments for replication.
+dev = ["ruff==0.15.20", "pyright==1.1.411", "pytest>=8.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rcc"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "D", "N", "RUF", "SIM", "S105", "S106", "S107", "S602", "S604", "S605", "S609", "T201"]
+ignore = ["D203", "D213", "SIM105", "SIM102", "SIM108", "SIM103", "SIM118"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"scripts/*" = ["D", "T201"]
+"examples/*" = ["T201"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pyright]
+include = ["src/rcc"]
+strict = ["src/rcc"]
+pythonVersion = "3.10"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+  "gpu: needs a GPU and model weights; not run by default",
+  "integration: multi-process or lifecycle simulations, run explicitly",
+  "live: drives a real engine seam; kept in the default run",
+]
+addopts = "-q --strict-markers -m 'not gpu and not integration'"

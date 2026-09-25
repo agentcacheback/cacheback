@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper."
+title: "RCLC: Receiver-Conditioned Latent Communication"
+authors:
+  - family-names: Rossi
+    given-names: Maximillian
+  - family-names: Raghunath
+    given-names: Prajwal
+  - family-names: Xuan
+    given-names: Haoqing
+  - family-names: Zhang
+    given-names: Yusen
+  - family-names: Wu
+    given-names: Eugene
+version: 0.1.0
+license: Apache-2.0
+preferred-citation:
+  type: unpublished
+  title: "Receiver-Conditioned Latent Communication gives 94% CacheBack"
+  authors:
+    - family-names: Rossi
+      given-names: Maximillian
+    - family-names: Raghunath
+      given-names: Prajwal
+    - family-names: Xuan
+      given-names: Haoqing
+    - family-names: Zhang
+      given-names: Yusen
+    - family-names: Wu
+      given-names: Eugene
+  year: 2026
+  notes: "Preprint"

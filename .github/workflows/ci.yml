@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+        transformers: ["4.57.1", "5.13.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install (CPU torch)
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          .venv/bin/python -m pip install ".[dev]" "transformers==${{ matrix.transformers }}"
+          .venv/bin/python -m pip check
+          .venv/bin/python -c 'import rcc, sys; from pathlib import Path; assert Path(rcc.__file__).is_relative_to(Path(sys.prefix))'
+          scripts/install-hooks.sh
+      - name: Harness
+        run: .venv/bin/python scripts/check.py

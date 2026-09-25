@@ -1,0 +1,5 @@
+# Default: the paper's Qwen3 CUDA 12.8 stack, in its own Linux environment.
+--extra-index-url https://download.pytorch.org/whl/cu128
+vllm==0.11.1
+torch==2.9.0+cu128
+transformers==4.57.1
