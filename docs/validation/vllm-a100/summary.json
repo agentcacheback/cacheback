@@ -1,0 +1,20 @@
+{
+  "0.11.1": {
+    "complete": 3,
+    "median_seconds": {
+      "capture": 0.1430338209997899,
+      "transfer": 20.048817995999798,
+      "generate": 4.5472944849998385
+    },
+    "peak_allocated_gib": 17.899220943450928
+  },
+  "0.26.0": {
+    "complete": 3,
+    "median_seconds": {
+      "capture": 0.1629782680001881,
+      "transfer": 20.267076929999803,
+      "generate": 5.555274179997923
+    },
+    "peak_allocated_gib": 17.792483806610107
+  }
+}

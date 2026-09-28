@@ -1,0 +1,19 @@
+{
+  "complete": false,
+  "config": {
+    "model": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "repeats": 3,
+    "source_sha256": "d3b0c5e92b3cdbeebca507953653e88206f7b443ff864d6838be667e049e0cf5"
+  },
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "versions": {
+    "vllm": "0.26.0",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.13.0",
+    "rclc": "0.1.0"
+  },
+  "calls": [],
+  "peak_allocated_bytes": 16409495552,
+  "peak_reserved_bytes": 16420700160
+}

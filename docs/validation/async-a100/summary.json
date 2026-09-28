@@ -1,0 +1,220 @@
+{
+  "run": "20260927T214201Z-ffb3b64f",
+  "date": "2026-09-27",
+  "source_sha256": "36972cc50262257e3e31fa6393361cd0fc1b194486df1e7e1474f92483917319",
+  "archive_sha256": "cd6bd6dcc3869f1752571023471724c721600a28f7a1ce800106fe244b5a2dfb",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "model": "Qwen/Qwen3-8B",
+  "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "runtime_deleted": true,
+  "linux_matrix": [
+    {
+      "python": "3.10",
+      "transformers": "4.57.1",
+      "complete": true
+    },
+    {
+      "python": "3.10",
+      "transformers": "5.13.0",
+      "complete": true
+    },
+    {
+      "python": "3.12",
+      "transformers": "4.57.1",
+      "complete": true
+    },
+    {
+      "python": "3.12",
+      "transformers": "5.13.0",
+      "complete": true
+    }
+  ],
+  "hf": [
+    {
+      "mode": "results.json",
+      "complete": true,
+      "config": {
+        "model": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+        "device": "cuda",
+        "ratio": 4,
+        "max_new_tokens": 128,
+        "source_sha256": "36972cc50262257e3e31fa6393361cd0fc1b194486df1e7e1474f92483917319",
+        "test_mode": false,
+        "vllm_pins": [
+          "0.11.1",
+          "0.26.0"
+        ]
+      },
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "answers": [
+        {
+          "answer": "Cedar is owned by Maya Chen.",
+          "contains_expected_text": true
+        },
+        {
+          "answer": "Birch launches on November 8.",
+          "contains_expected_text": true
+        }
+      ]
+    },
+    {
+      "mode": "hf-latent-50/results.json",
+      "complete": true,
+      "config": {
+        "model": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+        "device": "cuda",
+        "ratio": 4,
+        "max_new_tokens": 128,
+        "source_sha256": "36972cc50262257e3e31fa6393361cd0fc1b194486df1e7e1474f92483917319",
+        "test_mode": false,
+        "vllm_pins": [
+          "0.11.1",
+          "0.26.0"
+        ],
+        "reasoning": "partial(latent_mass, steps=50)",
+        "budget": 128
+      },
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "answers": [
+        {
+          "answer": "Cedar is owned by Maya Chen.",
+          "contains_expected_text": true
+        },
+        {
+          "answer": "Birch launches on **November 8**.",
+          "contains_expected_text": true
+        }
+      ]
+    },
+    {
+      "mode": "hf-custom-async/results.json",
+      "complete": true,
+      "config": {
+        "model": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+        "device": "cuda",
+        "ratio": 4,
+        "max_new_tokens": 128,
+        "source_sha256": "36972cc50262257e3e31fa6393361cd0fc1b194486df1e7e1474f92483917319",
+        "test_mode": false,
+        "vllm_pins": [
+          "0.11.1",
+          "0.26.0"
+        ],
+        "reasoning": "custom",
+        "budget": null
+      },
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "answers": [
+        {
+          "answer": "Cedar is owned by Maya Chen.",
+          "contains_expected_text": true
+        },
+        {
+          "answer": "Birch launches on November 8.",
+          "contains_expected_text": true
+        }
+      ]
+    }
+  ],
+  "vllm": {
+    "0.11.1": {
+      "complete": 3,
+      "versions": {
+        "vllm": "0.11.1",
+        "torch": "2.9.0+cu128",
+        "transformers": "4.57.1",
+        "rclc": "0.1.0"
+      },
+      "operations_per_run": 41,
+      "sequences_per_run": 68,
+      "tokens_per_sequence": 4,
+      "peak_allocated_gib": 17.907171726226807,
+      "median_seconds": {
+        "capture": 0.134804719000158,
+        "transfer": 19.05001987699984,
+        "generate": 4.584840000000668
+      },
+      "runs": [
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.13422224300006746,
+            "transfer": 19.26956699799962,
+            "generate": 4.590476016999446
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.13694122599986258,
+            "transfer": 19.05001987699984,
+            "generate": 4.550647726999841
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.134804719000158,
+            "transfer": 18.920378647000234,
+            "generate": 4.584840000000668
+          }
+        }
+      ]
+    },
+    "0.26.0": {
+      "complete": 3,
+      "versions": {
+        "vllm": "0.26.0",
+        "torch": "2.11.0+cu130",
+        "transformers": "5.13.0",
+        "rclc": "0.1.0"
+      },
+      "operations_per_run": 41,
+      "sequences_per_run": 68,
+      "tokens_per_sequence": 4,
+      "peak_allocated_gib": 17.800434589385986,
+      "median_seconds": {
+        "capture": 0.16167609200010702,
+        "transfer": 18.847334103998946,
+        "generate": 5.574384367000675
+      },
+      "runs": [
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.15590144799989503,
+            "transfer": 18.618506746000094,
+            "generate": 5.427625362000072
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.16167609200010702,
+            "transfer": 18.89249252100126,
+            "generate": 5.581073155000013
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.166227730999708,
+            "transfer": 18.847334103998946,
+            "generate": 5.574384367000675
+          }
+        }
+      ]
+    }
+  },
+  "scope": "Smoke validation of the async API on dense Qwen3; not benchmark accuracy or serving throughput.",
+  "setup_corrections": [
+    "Seeded pip in uv CPU environments because notebook tests record pip freeze.",
+    "Used a bounded 128-position budget for the 50-step HF case; relative r4 could not fit reserved latent rows."
+  ]
+}

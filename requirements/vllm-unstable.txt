@@ -1,0 +1,5 @@
+# Opt-in Qwen3 adapter. See docs/development.md for GPU results.
+--extra-index-url https://download.pytorch.org/whl/cu130
+vllm==0.26.0
+torch==2.11.0+cu130
+transformers==5.13.0

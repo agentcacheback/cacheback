@@ -1,0 +1,30 @@
+{
+  "complete": false,
+  "config": {
+    "model": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "device": "cuda",
+    "ratio": 4,
+    "max_new_tokens": 128,
+    "source_sha256": "5eafb38bdd38c52109fe65c72869ea29f1d2b68cc1e53d0c12cd23627139def2",
+    "test_mode": false,
+    "vllm_pins": [
+      "0.11.1",
+      "0.26.0"
+    ],
+    "reasoning": "hf-callable-2",
+    "budget": 128
+  },
+  "torch": "2.9.0+cu128",
+  "transformers": "4.57.1",
+  "dtype": "torch.bfloat16",
+  "resolved_model_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "model_load_seconds": 6.198296311999911,
+  "documents": [
+    "Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. ",
+    "Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. "
+  ],
+  "cases": [],
+  "peak_allocated_bytes": 16383586816
+}

@@ -1,0 +1,268 @@
+{
+  "date": "2026-09-26",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "config": {
+    "model": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "device": "cuda",
+    "ratio": 4,
+    "max_new_tokens": 128,
+    "source_sha256": "c342d6cca2ef76b9e7c6e432027c532da58ff2b9a57be0794ee5ad21bb261f3d",
+    "test_mode": false,
+    "vllm_pins": [
+      "0.11.1",
+      "0.26.0"
+    ],
+    "source_commit": "868fbe651b84ea9346e81587d3a1a3c04c0d1b1f"
+  },
+  "bundle_sha256": "89f1f0374c4eccc70b421fc45202325cb2a70d4b5ef304d3f3463067b757f8af",
+  "hf": {
+    "default": {
+      "complete": true,
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "cases": [
+        {
+          "request": "Who owns Cedar?",
+          "answer": "Cedar is owned by Maya Chen.",
+          "token_ids": [
+            34,
+            33215,
+            374,
+            12938,
+            553,
+            50344,
+            24495,
+            13,
+            151645
+          ],
+          "receiver_input_positions": 74,
+          "input_preparation_seconds": 0.000704048999978113,
+          "receiver_prefill_and_generation_seconds": 0.5013761560001058,
+          "expected_text": "Maya Chen",
+          "contains_expected_text": true
+        },
+        {
+          "request": "When does Birch launch?",
+          "answer": "Birch launches on November 8.",
+          "token_ids": [
+            33,
+            404,
+            331,
+            37075,
+            389,
+            6702,
+            220,
+            23,
+            13,
+            151645
+          ],
+          "receiver_input_positions": 75,
+          "input_preparation_seconds": 0.0006531070000619366,
+          "receiver_prefill_and_generation_seconds": 0.5266839220000747,
+          "expected_text": "November 8",
+          "contains_expected_text": true
+        }
+      ]
+    },
+    "latent_mass_50": {
+      "complete": true,
+      "torch": "2.9.0+cu128",
+      "transformers": "4.57.1",
+      "cases": [
+        {
+          "request": "Who owns Cedar?",
+          "answer": "Cedar is owned by Maya Chen.",
+          "token_ids": [
+            34,
+            33215,
+            374,
+            12938,
+            553,
+            50344,
+            24495,
+            13,
+            151645
+          ],
+          "receiver_input_positions": 272,
+          "input_preparation_seconds": 0.0011388689999876078,
+          "receiver_prefill_and_generation_seconds": 0.49214524599983633,
+          "expected_text": "Maya Chen",
+          "contains_expected_text": true
+        },
+        {
+          "request": "When does Birch launch?",
+          "answer": "Birch launches on **November 8**.",
+          "token_ids": [
+            33,
+            404,
+            331,
+            37075,
+            389,
+            3070,
+            33727,
+            220,
+            23,
+            334,
+            13,
+            151645
+          ],
+          "receiver_input_positions": 273,
+          "input_preparation_seconds": 0.0011980990000211023,
+          "receiver_prefill_and_generation_seconds": 0.640997501999891,
+          "expected_text": "November 8",
+          "contains_expected_text": true
+        }
+      ]
+    },
+    "custom_callable_2": {
+      "complete": true,
+      "torch": "2.9.0+cu128",
+      "transformers": "4.57.1",
+      "cases": [
+        {
+          "request": "Who owns Cedar?",
+          "answer": "Cedar is owned by Maya Chen.",
+          "token_ids": [
+            34,
+            33215,
+            374,
+            12938,
+            553,
+            50344,
+            24495,
+            13,
+            151645
+          ],
+          "receiver_input_positions": 249,
+          "input_preparation_seconds": 0.052958593000084875,
+          "receiver_prefill_and_generation_seconds": 0.501166430000012,
+          "expected_text": "Maya Chen",
+          "contains_expected_text": true
+        },
+        {
+          "request": "When does Birch launch?",
+          "answer": "Birch launches on **November 8**.",
+          "token_ids": [
+            33,
+            404,
+            331,
+            37075,
+            389,
+            3070,
+            33727,
+            220,
+            23,
+            334,
+            13,
+            151645
+          ],
+          "receiver_input_positions": 250,
+          "input_preparation_seconds": 0.0011063590000048862,
+          "receiver_prefill_and_generation_seconds": 0.6193191759998626,
+          "expected_text": "November 8",
+          "contains_expected_text": true
+        }
+      ]
+    }
+  },
+  "vllm": {
+    "0.11.1": {
+      "versions": {
+        "vllm": "0.11.1",
+        "torch": "2.9.0+cu128",
+        "transformers": "4.57.1",
+        "rclc": "0.1.0"
+      },
+      "runs": [
+        {
+          "repetition": 1,
+          "complete": true,
+          "calls": 41,
+          "peak_allocated_bytes": 19219142144,
+          "seconds": {
+            "capture": 0.13719785699981912,
+            "transfer": 20.456842648000475,
+            "generate": 4.58623313700059
+          }
+        },
+        {
+          "repetition": 2,
+          "complete": true,
+          "calls": 41,
+          "peak_allocated_bytes": 19219142144,
+          "seconds": {
+            "capture": 0.13886878500011335,
+            "transfer": 20.294367868999643,
+            "generate": 4.573592261999693
+          }
+        },
+        {
+          "repetition": 3,
+          "complete": true,
+          "calls": 41,
+          "peak_allocated_bytes": 19219142144,
+          "seconds": {
+            "capture": 0.13470191699980205,
+            "transfer": 20.005061247000185,
+            "generate": 4.557967542000142
+          }
+        }
+      ],
+      "median_seconds": {
+        "capture": 0.13719785699981912,
+        "transfer": 20.294367868999643,
+        "generate": 4.573592261999693
+      }
+    },
+    "0.26.0": {
+      "versions": {
+        "vllm": "0.26.0",
+        "torch": "2.11.0+cu130",
+        "transformers": "5.13.0",
+        "rclc": "0.1.0"
+      },
+      "runs": [
+        {
+          "repetition": 1,
+          "complete": true,
+          "calls": 41,
+          "peak_allocated_bytes": 19104534016,
+          "seconds": {
+            "capture": 0.16631690300005175,
+            "transfer": 19.87112570599993,
+            "generate": 5.559612663999815
+          }
+        },
+        {
+          "repetition": 2,
+          "complete": true,
+          "calls": 41,
+          "peak_allocated_bytes": 19104534016,
+          "seconds": {
+            "capture": 0.15848167000012836,
+            "transfer": 19.56217672200046,
+            "generate": 5.4958263909998095
+          }
+        },
+        {
+          "repetition": 3,
+          "complete": true,
+          "calls": 41,
+          "peak_allocated_bytes": 19104534016,
+          "seconds": {
+            "capture": 0.16204712299986568,
+            "transfer": 19.761789027000077,
+            "generate": 5.476487730000599
+          }
+        }
+      ],
+      "median_seconds": {
+        "capture": 0.16204712299986568,
+        "transfer": 19.761789027000077,
+        "generate": 5.4958263909998095
+      }
+    }
+  },
+  "runtime_deleted": true
+}

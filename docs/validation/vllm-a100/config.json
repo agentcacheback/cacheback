@@ -1,0 +1,6 @@
+{
+  "model": "Qwen/Qwen3-8B",
+  "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "repeats": 3,
+  "source_sha256": "d3b0c5e92b3cdbeebca507953653e88206f7b443ff864d6838be667e049e0cf5"
+}

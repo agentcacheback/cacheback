@@ -1,0 +1,235 @@
+{
+  "run": "20260928T184109Z-2c500412",
+  "date": "2026-09-28",
+  "source_sha256": "7408283f043f525141a57f5cc88254390d13576ab1ab2ea40c0419bf450ab675",
+  "archive_sha256": "3b7911fe87623d832abb445c56e7af2f0b4383a35c313ce9f0b563b45972ded3",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "model": "Qwen/Qwen3-8B",
+  "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "runtime_deleted": true,
+  "linux_matrix": [
+    {
+      "python": "3.10",
+      "transformers": "4.57.1",
+      "complete": true
+    },
+    {
+      "python": "3.10",
+      "transformers": "5.13.0",
+      "complete": true
+    },
+    {
+      "python": "3.12",
+      "transformers": "4.57.1",
+      "complete": true
+    },
+    {
+      "python": "3.12",
+      "transformers": "5.13.0",
+      "complete": true
+    }
+  ],
+  "hf": [
+    {
+      "mode": "results.json",
+      "complete": true,
+      "config": {
+        "model": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+        "device": "cuda",
+        "ratio": 4,
+        "max_new_tokens": 128,
+        "source_sha256": "7408283f043f525141a57f5cc88254390d13576ab1ab2ea40c0419bf450ab675",
+        "test_mode": false,
+        "vllm_pins": [
+          "0.11.1",
+          "0.26.0"
+        ]
+      },
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "answers": [
+        {
+          "answer": "Cedar is owned by Maya Chen.",
+          "contains_expected_text": true
+        },
+        {
+          "answer": "Birch launches on November 8.",
+          "contains_expected_text": true
+        }
+      ]
+    },
+    {
+      "mode": "hf-latent-50/results.json",
+      "complete": true,
+      "config": {
+        "model": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+        "device": "cuda",
+        "ratio": 4,
+        "max_new_tokens": 128,
+        "source_sha256": "7408283f043f525141a57f5cc88254390d13576ab1ab2ea40c0419bf450ab675",
+        "test_mode": false,
+        "vllm_pins": [
+          "0.11.1",
+          "0.26.0"
+        ],
+        "reasoning": "partial(latent_mass, steps=50)",
+        "budget": 128
+      },
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "answers": [
+        {
+          "answer": "Cedar is owned by Maya Chen.",
+          "contains_expected_text": true
+        },
+        {
+          "answer": "Birch launches on **November 8**.",
+          "contains_expected_text": true
+        }
+      ]
+    },
+    {
+      "mode": "hf-custom-async/results.json",
+      "complete": true,
+      "config": {
+        "model": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+        "device": "cuda",
+        "ratio": 4,
+        "max_new_tokens": 128,
+        "source_sha256": "7408283f043f525141a57f5cc88254390d13576ab1ab2ea40c0419bf450ab675",
+        "test_mode": false,
+        "vllm_pins": [
+          "0.11.1",
+          "0.26.0"
+        ],
+        "reasoning": "custom",
+        "budget": null
+      },
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.1",
+      "answers": [
+        {
+          "answer": "Cedar is owned by Maya Chen.",
+          "contains_expected_text": true
+        },
+        {
+          "answer": "Birch launches on November 8.",
+          "contains_expected_text": true
+        }
+      ]
+    }
+  ],
+  "vllm": {
+    "0.11.1": {
+      "complete": 3,
+      "versions": {
+        "vllm": "0.11.1",
+        "torch": "2.9.0+cu128",
+        "transformers": "4.57.1",
+        "rclc": "0.1.0"
+      },
+      "operations_per_run": 45,
+      "calls_per_run": {
+        "transfer": 19,
+        "generate": 21,
+        "capture": 5
+      },
+      "sequences_per_run": 68,
+      "tokens_per_sequence": 4,
+      "identical_outputs_across_runs": true,
+      "identical_outputs_to_2026_09_27": true,
+      "peak_allocated_gib": 17.9071683883667,
+      "median_seconds": {
+        "capture": 0.23815061499976764,
+        "transfer": 18.401649965999695,
+        "generate": 4.652506350999374
+      },
+      "runs": [
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.23815061499976764,
+            "transfer": 18.2443287469996,
+            "generate": 4.667465841000421
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.24113038599989522,
+            "transfer": 18.401649965999695,
+            "generate": 4.64494018200071
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.23695937999991656,
+            "transfer": 18.558358684000268,
+            "generate": 4.652506350999374
+          }
+        }
+      ]
+    },
+    "0.26.0": {
+      "complete": 3,
+      "versions": {
+        "vllm": "0.26.0",
+        "torch": "2.11.0+cu130",
+        "transformers": "5.13.0",
+        "rclc": "0.1.0"
+      },
+      "operations_per_run": 45,
+      "calls_per_run": {
+        "transfer": 19,
+        "generate": 21,
+        "capture": 5
+      },
+      "sequences_per_run": 68,
+      "tokens_per_sequence": 4,
+      "identical_outputs_across_runs": true,
+      "identical_outputs_to_2026_09_27": true,
+      "peak_allocated_gib": 17.80043125152588,
+      "median_seconds": {
+        "capture": 0.2873817650001911,
+        "transfer": 18.455015176001325,
+        "generate": 5.676592787001027
+      },
+      "runs": [
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.29180266900038987,
+            "transfer": 18.988993004000804,
+            "generate": 5.652507979000347
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.2865402050006196,
+            "transfer": 18.419850683998447,
+            "generate": 5.676592787001027
+          }
+        },
+        {
+          "complete": true,
+          "phase_seconds": {
+            "capture": 0.2873817650001911,
+            "transfer": 18.455015176001325,
+            "generate": 5.677584371000194
+          }
+        }
+      ]
+    }
+  },
+  "scope": "Smoke validation of the async API on dense Qwen3; not benchmark accuracy or serving throughput.",
+  "setup_corrections": [
+    "Seeded pip in uv CPU environments because notebook tests record pip freeze.",
+    "Used a bounded 128-position budget for the 50-step HF case; relative r4 could not fit reserved latent rows.",
+    "The first attempt failed all four Linux matrix jobs: ZIP extraction flattened the Git hook symlinks. scripts/install-hooks.sh now restores them; the rerun used the repaired source."
+  ]
+}

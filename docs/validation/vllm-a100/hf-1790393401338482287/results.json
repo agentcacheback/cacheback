@@ -1,0 +1,75 @@
+{
+  "complete": true,
+  "config": {
+    "model": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "repeats": 3,
+    "source_sha256": "d3b0c5e92b3cdbeebca507953653e88206f7b443ff864d6838be667e049e0cf5",
+    "device": "cuda",
+    "ratio": 4,
+    "max_new_tokens": 128,
+    "test_mode": false
+  },
+  "torch": "2.9.0+cu128",
+  "transformers": "4.57.1",
+  "dtype": "torch.bfloat16",
+  "resolved_model_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "model_load_seconds": 6.72875369600024,
+  "documents": [
+    "Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. Cedar is owned by Maya Chen and launches on October 12. ",
+    "Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. Birch is owned by Luis Ortega and launches on November 8. "
+  ],
+  "cases": [
+    {
+      "request": "Who owns Cedar?",
+      "answer": "Cedar is owned by Maya Chen.",
+      "token_ids": [
+        34,
+        33215,
+        374,
+        12938,
+        553,
+        50344,
+        24495,
+        13,
+        151645
+      ],
+      "receiver_input_positions": 74,
+      "input_preparation_seconds": 0.0008142219999172084,
+      "receiver_prefill_and_generation_seconds": 0.4900160849997519,
+      "expected_text": "Maya Chen",
+      "contains_expected_text": true
+    },
+    {
+      "request": "When does Birch launch?",
+      "answer": "Birch launches on **November 8**.",
+      "token_ids": [
+        33,
+        404,
+        331,
+        37075,
+        389,
+        3070,
+        33727,
+        220,
+        23,
+        334,
+        13,
+        151645
+      ],
+      "receiver_input_positions": 75,
+      "input_preparation_seconds": 0.000648269000066648,
+      "receiver_prefill_and_generation_seconds": 0.629389978999825,
+      "expected_text": "November 8",
+      "contains_expected_text": true
+    }
+  ],
+  "peak_allocated_bytes": 16447636480,
+  "sender_prefill_seconds": 0.4839149989998077,
+  "sender_positions": [
+    114,
+    115
+  ],
+  "transfer_seconds": 0.6758740159998524
+}

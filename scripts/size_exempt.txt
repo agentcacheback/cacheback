@@ -1,0 +1,8 @@
+demo/trace-w4.json : recorded Qwen3-8B demo data, not source
+demo/trace.json : recorded Qwen3-8B demo data, not source
+docs/validation/vllm-a100/vllm-0.11.1-1/result.json : recorded A100 validation output, not source
+docs/validation/vllm-a100/vllm-0.11.1-2/result.json : recorded A100 validation output, not source
+docs/validation/vllm-a100/vllm-0.11.1-3/result.json : recorded A100 validation output, not source
+docs/validation/vllm-a100/vllm-0.26.0-1790393116560771441-1/result.json : recorded A100 validation output, not source
+docs/validation/vllm-a100/vllm-0.26.0-1790393279322746627-2/result.json : recorded A100 validation output, not source
+docs/validation/vllm-a100/vllm-0.26.0-1790393340012499784-3/result.json : recorded A100 validation output, not source

@@ -1,0 +1,35 @@
+# Python build noise
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/
+
+# Model weights and caches: never committed
+*.safetensors
+*.gguf
+*.pt
+*.pth
+*.bin
+.hf_cache/
+checkpoints/
+
+# Local run output
+/runs/
+/results/
+/output/
+/tmp/
+
+# Secrets and local environment
+.env
+.env.*
+*.key

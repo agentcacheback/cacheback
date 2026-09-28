@@ -1,0 +1,42 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00, 108.33it/s]
+Traceback (most recent call last):
+  File "/tmp/rcc-api-source-6zs2itr7/src/rcc/reasoning.py", line 93, in _validate_cache
+    torch.testing.assert_close(new[:, :, :length], old)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/content/rcc-envs/0.11.1/lib/python3.13/site-packages/torch/testing/_comparison.py", line 1589, in assert_close
+    raise error_metas[0].to_error(msg)
+AssertionError: Tensor-likes are not close!
+
+Mismatched elements: 64 / 116736 (0.1%)
+Greatest absolute difference: 0.015625 at index (0, 3, 113, 5) (up to 1e-05 allowed)
+Greatest relative difference: 0.5 at index (0, 4, 113, 75) (up to 0.016 allowed)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/content/drive/MyDrive/rcc-api/20260926T172441Z-7f105ec7/hf-callable-2/run.py", line 66, in <module>
+    transfer(senders, receiver, requests, budget=128, reasoning=custom_reasoning)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/rcc-api-source-6zs2itr7/src/rcc/transport.py", line 277, in transfer
+    deliveries = _deliveries(
+        senders,
+    ...<8 lines>...
+        reasoning_budget,
+    )
+  File "/tmp/rcc-api-source-6zs2itr7/src/rcc/transport.py", line 320, in _deliveries
+    apply_reasoning(
+    ~~~~~~~~~~~~~~~^
+        s, reasoning, maximum, request_positions=max(q[i].shape[1] for q in ids)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/tmp/rcc-api-source-6zs2itr7/src/rcc/reasoning.py", line 127, in apply_reasoning
+    _validate_result(state, result, allowance)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/rcc-api-source-6zs2itr7/src/rcc/reasoning.py", line 72, in _validate_result
+    _validate_cache(state, result)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/tmp/rcc-api-source-6zs2itr7/src/rcc/reasoning.py", line 95, in _validate_cache
+    raise ValueError("reasoning changed the cache prefix") from error
+ValueError: reasoning changed the cache prefix
