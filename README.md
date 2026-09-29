@@ -3,7 +3,7 @@
 **Receiver-conditioned latent communication for agents.**
 
 Code for *Receiver-Conditioned Latent Communication gives 94% CacheBack*.
-**Paper link: TBA.** [Python API](https://github.com/maxr0ssi/rclc/blob/main/docs/api.md) · [Paper replication](https://github.com/maxr0ssi/rclc/blob/main/docs/replication.md)
+**[Paper](https://arxiv.org/abs/2609.32046).** [Python API](https://github.com/maxr0ssi/rclc/blob/main/docs/api.md) · [Paper replication](https://github.com/maxr0ssi/rclc/blob/main/docs/replication.md)
 
 Agents distribute large contexts across senders and receivers. Text messages
 require decoding and can omit evidence. Full KV-cache messages accumulate every
