@@ -1,9 +1,10 @@
 # Project website
 
-The project page lives at <https://maxr0ssi.github.io/rclc/>. GitHub Pages
-publishes the repository root from `main`, using the existing Pages settings.
-Merging a homepage change into `main` updates the site automatically.
-The root `.nojekyll` file serves these static files without Jekyll processing.
+The project page lives at <https://agentcacheback.github.io/>. Its source is
+[agentcacheback.github.io](https://github.com/agentcacheback/agentcacheback.github.io).
+GitHub Pages publishes the root of that repository's `main` branch. Make public
+website changes there; the files retained in this repository are a compatibility
+copy. The root `.nojekyll` file serves static files without Jekyll processing.
 The canonical URL and social preview point to this Pages address and the coding
 video poster. Share the homepage, or append `#demo` to link to the main demo.
 

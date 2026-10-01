@@ -149,7 +149,7 @@ All four combinations also passed for the release source on Colab Linux on
 2026-09-28: 27 CPU tests per combination plus the full harness and dependency
 checks ([results](validation/release-a100/summary.json)). The validation environments
 include pip because the notebook tests record `pip freeze`. The initial public
-snapshot passed [Ubuntu CI](https://github.com/maxr0ssi/rclc/actions/runs/36208175275).
+snapshot passed [Ubuntu CI](https://github.com/agentcacheback/rclc/actions/runs/36208175275).
 Local checks also passed on macOS Apple Silicon with Python 3.11 and CPU PyTorch.
 
 On a Windows machine, use Ubuntu under WSL2 for these Linux checks. This does

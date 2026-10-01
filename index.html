@@ -8,11 +8,11 @@
   <meta property="og:title" content="CacheBack | Receiver-conditioned communication">
   <meta property="og:description" content="The receiver asks for what it needs. CacheBack uses that request to select which internal state gets sent, without additional training.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://maxr0ssi.github.io/rclc/">
-  <meta property="og:image" content="https://maxr0ssi.github.io/rclc/demo/coding/poster.jpg">
+  <meta property="og:url" content="https://agentcacheback.github.io/">
+  <meta property="og:image" content="https://agentcacheback.github.io/demo/coding/poster.jpg">
   <meta property="og:image:alt" content="CacheBack completes a Django patch while text workers are still writing reports.">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="canonical" href="https://maxr0ssi.github.io/rclc/">
+  <link rel="canonical" href="https://agentcacheback.github.io/">
   <title>CacheBack | Receiver-conditioned communication</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c211e'/%3E%3Cpath d='M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z' fill='%230f766e'/%3E%3Cpath d='M18 18h7v7h-7z' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="website/assets/styles.css?v=compact-3">
@@ -39,7 +39,7 @@
         <p class="contribution">Our simplest implementation of receiver-conditioning: <strong>robust and training-free.</strong></p>
         <nav class="resource-links" aria-label="Project resources">
           <a href="https://arxiv.org/pdf/2609.32046">Paper <span>PDF</span></a>
-          <a href="https://github.com/maxr0ssi/rclc">Code</a>
+          <a href="https://github.com/agentcacheback/rclc">Code</a>
           <a href="#demo">Watch demo</a>
           <a href="https://arxiv.org/abs/2609.32046">arXiv</a>
           <a href="#citation" id="cite-link">Cite</a>
@@ -152,7 +152,7 @@
 - "If she is collecting at Harbour Hub, a passport is required, and a driving licence is not accepted."</div></details>
             </article>
           </div>
-          <p class="demo-caption">Qwen3-8B · one A100 · r4 · one warm run per method. Times include three handoffs and final answer generation, excluding model loading, tokenization, and warmup. This recording is an example, not a benchmark. <a href="demo/trace-w4.json">Raw recording</a> · <a href="https://github.com/maxr0ssi/rclc/blob/main/demo/README.md">Setup</a></p>
+          <p class="demo-caption">Qwen3-8B · one A100 · r4 · one warm run per method. Times include three handoffs and final answer generation, excluding model loading, tokenization, and warmup. This recording is an example, not a benchmark. <a href="demo/trace-w4.json">Raw recording</a> · <a href="https://github.com/agentcacheback/rclc/blob/main/demo/README.md">Setup</a></p>
           <details class="demo-replay"><summary><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2v20l16-10z"/></svg>Replay the booking handoffs</summary>
             <div class="demo-replay-link"><a class="text-link" href="demo/index.html" target="_blank" rel="noopener noreferrer">Open full window <span aria-hidden="true">↗</span></a></div>
             <div class="demo-window"><iframe id="flagship-demo" src="demo/index.html?v=fit-3" title="Recorded CacheBack and text booking relay comparison, with playback controls" loading="lazy" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe></div>
@@ -168,7 +168,7 @@
         </div>
       </div>
     </section>
-    <section class="code-section" id="code" aria-labelledby="code-title"><div class="wrap code-layout"><div><h2 id="code-title">Quickstart</h2><p>Bind a sender and receiver to matching models, then pass the receiver’s request to <code>rcc.transfer</code>. CacheBack is the default selector. Continue generation with your model’s native API.</p><a class="button primary" href="https://github.com/maxr0ssi/rclc">Code and documentation</a><p class="code-note">Local Qwen 3 weights, using Hugging Face or vLLM.<br>Hosted chat APIs do not expose the required state.</p></div><div class="code-card"><div class="code-bar"><span>Python</span><button class="copy-button" data-copy="quickstart" type="button">Copy code</button></div><pre><code id="quickstart"><span class="code-keyword">import</span> rcc
+    <section class="code-section" id="code" aria-labelledby="code-title"><div class="wrap code-layout"><div><h2 id="code-title">Quickstart</h2><p>Bind a sender and receiver to matching models, then pass the receiver’s request to <code>rcc.transfer</code>. CacheBack is the default selector. Continue generation with your model’s native API.</p><a class="button primary" href="https://github.com/agentcacheback/rclc">Code and documentation</a><p class="code-note">Local Qwen 3 weights, using Hugging Face or vLLM.<br>Hosted chat APIs do not expose the required state.</p></div><div class="code-card"><div class="code-bar"><span>Python</span><button class="copy-button" data-copy="quickstart" type="button">Copy code</button></div><pre><code id="quickstart"><span class="code-keyword">import</span> rcc
 
 sender = rcc.<span class="code-function">bind</span>(
     model, tokenizer,
@@ -182,8 +182,8 @@ receiver = rcc.<span class="code-function">bind</span>(
     sender, receiver,
     <span class="code-string">"Who owns the Cedar booking?"</span>,
 )</span>
-inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class="snippet-note">Model, tokenizer, and histories loaded; run in an async function or notebook. <a href="https://github.com/maxr0ssi/rclc/blob/main/examples/quickstart.py">Runnable quickstart</a></p></div></div></section>
-    <section id="paper" class="section wrap paper-section" aria-labelledby="paper-title"><div><p class="eyebrow">THE PAPER</p><h2 id="paper-title">Receiver-Conditioned Latent Communication gives 94% CacheBack</h2><p>Maximillian Rossi, Prajwal Raghunath, Haoqing Xuan, Yusen Zhang, and Eugene Wu.</p><div class="hero-actions"><a class="button primary" href="https://arxiv.org/pdf/2609.32046">Read the PDF</a><a class="text-link" href="https://github.com/maxr0ssi/rclc/tree/paper">Reproduce the paper</a></div></div><details class="citation" id="citation"><summary>Cite this work <span>BibTeX</span></summary><button class="copy-button" data-copy="bibtex" type="button">Copy citation</button><pre><code id="bibtex">@misc{rossi2026cacheback,
+inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class="snippet-note">Model, tokenizer, and histories loaded; run in an async function or notebook. <a href="https://github.com/agentcacheback/rclc/blob/main/examples/quickstart.py">Runnable quickstart</a></p></div></div></section>
+    <section id="paper" class="section wrap paper-section" aria-labelledby="paper-title"><div><p class="eyebrow">THE PAPER</p><h2 id="paper-title">Receiver-Conditioned Latent Communication gives 94% CacheBack</h2><p>Maximillian Rossi, Prajwal Raghunath, Haoqing Xuan, Yusen Zhang, and Eugene Wu.</p><div class="hero-actions"><a class="button primary" href="https://arxiv.org/pdf/2609.32046">Read the PDF</a><a class="text-link" href="https://github.com/agentcacheback/rclc/tree/paper">Reproduce the paper</a></div></div><details class="citation" id="citation"><summary>Cite this work <span>BibTeX</span></summary><button class="copy-button" data-copy="bibtex" type="button">Copy citation</button><pre><code id="bibtex">@misc{rossi2026cacheback,
   title = {Receiver-Conditioned Latent Communication
            gives 94\% CacheBack},
   author = {Rossi, Maximillian and Raghunath, Prajwal
@@ -196,7 +196,7 @@ inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class=
   url = {https://arxiv.org/abs/2609.32046}
 }</code></pre></details></section>
   </main>
-  <footer class="site-footer wrap"><a class="brand" href="#">CacheBack</a><span>Receiver-conditioned communication · 2026</span><a href="https://github.com/maxr0ssi/rclc">Code &amp; reproducibility</a></footer>
+  <footer class="site-footer wrap"><a class="brand" href="#">CacheBack</a><span>Receiver-conditioned communication · 2026</span><a href="https://github.com/agentcacheback/rclc">Code &amp; reproducibility</a></footer>
   <div id="copy-status" class="sr-only" role="status"></div>
 </body>
 </html>

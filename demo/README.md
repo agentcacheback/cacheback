@@ -10,7 +10,7 @@ Harbour Hub, whose passport requirement overrides the original desk's ID advice.
 The [booking section](../index.html#booking-demo), below the main coding video, presents the recorded final answers
 and completion times before the replay. Selected positions use teal highlights.
 
-Open <https://maxr0ssi.github.io/rclc/demo/> and press **Run**. To serve it
+Open <https://agentcacheback.github.io/demo/> and press **Run**. To serve it
 locally, run this from the repository root and open <http://127.0.0.1:8765/demo/>:
 
 ```bash
