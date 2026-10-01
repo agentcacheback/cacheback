@@ -5,6 +5,18 @@ on:
   pull_request:
 
 jobs:
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check project website and demo paths
+        run: |
+          node --check website/assets/app.js
+          node website/check.mjs
+
   checks:
     runs-on: ubuntu-latest
     strategy:

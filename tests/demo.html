@@ -9,7 +9,7 @@
   const assert = (value, message) => { if (!value) throw new Error(message); };
   const plain = text => text.replace(/\*\*([^*\n]+)\*\*/g, "$1");
   try {
-    await new Promise(resolve => { frame.onload = resolve; frame.src = "../demo/"; });
+    await new Promise(resolve => { frame.onload = resolve; frame.src = "../demo/index.html"; });
     const win = frame.contentWindow, doc = frame.contentDocument;
     const play = doc.querySelector("#play"), speed = doc.querySelector("#speed"), clear = doc.querySelector("#clear");
     await new Promise((resolve, reject) => {
@@ -26,7 +26,7 @@
     let next;
     win.requestAnimationFrame = callback => { next = callback; return 1; };
     win.cancelAnimationFrame = () => { next = null; };
-    Object.defineProperty(win.performance, "now", {value:() => 0});
+    Object.defineProperty(win.performance, "now", {value:() => 10000});
     assert(doc.querySelectorAll("button").length === 2 && [...speed.options].map(option => option.value).join() === "1,2,4", "Only playback, clear and speed controls");
     assert(speed.value === "1", "Recorded speed is the default");
     assert(doc.querySelectorAll(".topology li").length === 4, "Four-agent topology");
@@ -44,6 +44,7 @@
         for (const method of ["rclc", "text"]) {
           const row = doc.querySelector(`#${method}-row`), run = recorded[method];
           const complete = ends[method].filter(end => elapsed >= end).length;
+          assert(Number.parseFloat(doc.querySelector(`#${method}-time`).textContent) >= 0, "Playback uses one animation clock, even when performance.now has a different origin");
           assert(row.children.length === 4, "All chunks remain visible");
           if (method === "rclc") {
             trace.sources.forEach((source,i) => assert(row.children[i].textContent === source.text, "Source text is unchanged"));
@@ -73,9 +74,14 @@
     assert(!doc.querySelector("mark") && !doc.querySelector("#text-row").textContent && !doc.querySelector(".answer").textContent, "Clear removes all output and highlights");
     assert([...doc.querySelectorAll(".time")].every(node => !node.textContent) && play.textContent === "Run", "Clear resets clocks");
     frame.style.width = "390px";
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     assert(doc.documentElement.scrollWidth === doc.documentElement.clientWidth, "Mobile page fits its viewport");
-    assert(doc.querySelector(".flow").scrollWidth > doc.querySelector(".flow").clientWidth, "Mobile topology scrolls as one diagram");
+    assert(doc.querySelector(".flow").scrollWidth === doc.querySelector(".flow").clientWidth, "Mobile relay fits without horizontal scrolling");
+    assert(doc.documentElement.scrollHeight <= win.innerHeight, "Embedded replay grows without a vertical frame scrollbar");
+    assert([...doc.querySelectorAll(".chunk")].every(node => node.dataset.agent.startsWith("Agent ")), "Stacked cards retain agent labels");
     frame.style.width = "100%";
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    assert(doc.documentElement.scrollHeight <= win.innerHeight, "Embedded replay shrinks back to desktop content height");
     await new Promise(resolve => { frame.onload = resolve; win.location.reload(); });
     const live = frame.contentDocument, livePlay = live.querySelector("#play");
     await new Promise(resolve => {
@@ -90,7 +96,7 @@
     assert(!livePlay.disabled && livePlay.textContent === "Replay", "Native animation clock completes playback after testing");
     for (const method of ["rclc", "text"]) assert(live.querySelector(`#${method}-row .answer`).textContent.startsWith(plain(recorded[method].answer.text)), "Real-time playback reaches both full answers");
     live.querySelector("#clear").click(); live.querySelector("#speed").value = "1";
-    const page = await (await fetch("../demo/")).text();
+    const page = await (await fetch("../demo/index.html")).text();
     for (const change of ["answer", "question"]) {
       const altered = structuredClone(trace);
       if (change === "answer") altered.cases[0].rclc.answer.text = "Maya should go to Central Desk.";
@@ -107,11 +113,29 @@
         if (!changedPlay.disabled) { clearTimeout(timeout); observer.disconnect(); resolve(); }
       });
       frame.contentWindow.requestAnimationFrame = callback => { next = callback; return 1; };
-      changedPlay.click(); next(frame.contentWindow.performance.now() + Math.max(recorded.rclc.seconds, recorded.text.seconds) * 1000 + 1000);
+      changedPlay.click(); next(0); next(Math.max(recorded.rclc.seconds, recorded.text.seconds) * 1000 + 1000);
       assert(!changed.querySelector(".answer-check"), "Unreviewed recordings are not labelled correct");
       URL.revokeObjectURL(url);
     }
-    await new Promise(resolve => { frame.onload = resolve; frame.removeAttribute("srcdoc"); frame.src = "../demo/"; });
+    await new Promise(resolve => { frame.onload = resolve; frame.removeAttribute("srcdoc"); frame.src = `../index.html?check=${Date.now()}`; });
+    const home = frame.contentDocument, disclosure = home.querySelector(".demo-replay");
+    const replay = home.querySelector("#flagship-demo");
+    await new Promise(resolve => {
+      replay.onload = resolve; replay.loading = "eager"; disclosure.open = true;
+    });
+    for (const width of [1280, 390, 1280]) {
+      frame.style.width = `${width}px`;
+      for (const open of [false, true]) {
+        disclosure.open = open;
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      }
+      const inside = replay.contentDocument, view = replay.contentWindow;
+      assert(inside.documentElement.scrollHeight <= view.innerHeight, "Actual homepage fits the full replay height without suppressing overflow");
+      assert(inside.querySelector("footer").getBoundingClientRect().bottom <= view.innerHeight, "Replay footer is inside the frame after resizing and reopening");
+      assert(inside.documentElement.scrollWidth <= view.innerWidth, "Actual homepage replay has no horizontal overflow");
+      assert(!["hidden", "clip"].includes(view.getComputedStyle(inside.documentElement).overflowY), "Unexpected overflow remains accessible rather than clipped");
+      assert(view.getComputedStyle(inside.querySelector(".chunk")).overflowY === "auto", "Document panes remain scrollable");
+    }
     document.title = "Replay check passed";
   } catch (error) {
     result.hidden = false; result.textContent = `FAIL: ${error.message}`;
