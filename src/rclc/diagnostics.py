@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 import torch
 
 if TYPE_CHECKING:
-    from rcc.hf import Agent
+    from rclc.hf import Agent
 
 
 def _version(package: str) -> str | None:
@@ -47,8 +47,8 @@ def _vllm_issues(versions: dict[str, str | None], cuda: bool, allow_unstable: bo
 
 
 def _agent_issues(agent: Agent) -> list[str]:
-    from rcc import vllm
-    from rcc.transport import validate_model
+    from rclc import vllm
+    from rclc.transport import validate_model
 
     try:
         validate_model(agent.model)

@@ -1,10 +1,10 @@
 """Receiver-conditioned state transfer between existing agents."""
 
-from rcc.diagnostics import check
-from rcc.hf import Agent, HFReceiver, sender_from_hf
-from rcc.latent import latent_mass, latent_mass_sync
-from rcc.message import Message
-from rcc.transport import Delivery, SenderState, transfer, transfer_sync
+from rclc.diagnostics import check
+from rclc.hf import Agent, HFReceiver, sender_from_hf
+from rclc.latent import latent_mass, latent_mass_sync
+from rclc.message import Message
+from rclc.transport import Delivery, SenderState, transfer, transfer_sync
 
 bind = Agent
 

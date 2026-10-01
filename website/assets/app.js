@@ -1,6 +1,5 @@
 if (typeof document !== 'undefined') {
   const byId = (id) => document.getElementById(id);
-  byId('cite-link').addEventListener('click', () => { byId('citation').open = true; });
   const video = byId('coding-video');
   const play = byId('play-demo');
   play.hidden = false;

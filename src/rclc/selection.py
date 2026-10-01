@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 import torch
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 Kind = Literal["token", "latent", "continuous", "unknown"]
 
@@ -112,12 +112,12 @@ def selection_html(selections: Sequence[Selection | None], request: str) -> str:
         '<!doctype html><html lang="en"><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         "<title>Transfer selection</title><style>"
-        ".rcc-selection{font:16px/1.6 system-ui,sans-serif;max-width:900px;"
+        ".rclc-selection{font:16px/1.6 system-ui,sans-serif;max-width:900px;"
         "margin:32px auto;padding:20px;color:#202620;background:#fff}"
-        ".rcc-selection h2{font-size:16px}.rcc-selection p{overflow-wrap:anywhere}"
-        ".rcc-selection pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}"
-        ".rcc-selection mark{background:#c9f0cb;color:#18391c;text-decoration:underline}"
-        '.rcc-selection section{margin-top:28px}</style><body><div class="rcc-selection">'
+        ".rclc-selection h2{font-size:16px}.rclc-selection p{overflow-wrap:anywhere}"
+        ".rclc-selection pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}"
+        ".rclc-selection mark{background:#c9f0cb;color:#18391c;text-decoration:underline}"
+        '.rclc-selection section{margin-top:28px}</style><body><div class="rclc-selection">'
         f"<p><strong>Request:</strong> {escape(request)}</p>"
         "<p>Green underlined spans were kept. Hover for source positions.</p>"
         + "".join(sections)

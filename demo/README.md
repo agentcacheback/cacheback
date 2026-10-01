@@ -50,7 +50,7 @@ animation.
 
 ## Record
 
-Install RCC as described in the [repository README](../README.md#install), then
+Install RCLC as described in the [repository README](../README.md#install), then
 run:
 
 ```bash
@@ -70,12 +70,12 @@ GPU with a high-RAM host. Prepare its source bundle from a committed checkout:
 
 ```bash
 mkdir -p output/colab
-git archive --format=zip --output=output/colab/rcc-demo-colab-source.zip HEAD
+git archive --format=zip --output=output/colab/rclc-demo-colab-source.zip HEAD
 ```
 
 Upload that ZIP when prompted, mount Drive and run the cells in order. Each run
 saves its source, configuration, environment, complete logs and traces to a new
-`MyDrive/rcc-demo/<run-id>/` folder. The notebook retains its width comparison
+`MyDrive/rclc-demo/<run-id>/` folder. The notebook retains its width comparison
 for analysis; the viewer shows W=4 only. The last cell downloads a portable
 replay; serve its extracted directory with the command above. Replay needs no
 model.
@@ -88,7 +88,7 @@ handoff alone. Later agents cannot reread discarded evidence.
 
 Text generates new notes; each text column is the actual message generated at
 that step, not a summary written for the viewer. RCLC sends selected input
-embeddings through `rcc.transfer_sync`, with no extra latent steps. Highlights
+embeddings through `rclc.transfer_sync`, with no extra latent steps. Highlights
 follow exact tokenizer offsets, including word fragments. As another document
 arrives, selection can drop evidence retained at the previous handoff.
 

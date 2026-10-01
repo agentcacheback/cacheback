@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from examples.evaluate_selectors import evaluate, load_cases, recent
 
-from rcc import SenderState
-from rcc.selectors import cacheback, chunkkv, qsnap
+from rclc import SenderState
+from rclc.selectors import cacheback, chunkkv, qsnap
 
 
 def test_selector_comparison(senders: list[SenderState], tmp_path: Path) -> None:

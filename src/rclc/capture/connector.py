@@ -11,7 +11,7 @@ from typing import Any
 
 import torch
 
-from rcc.capture.pages import DenseKV, ExtractSpec, LayerPages, extract_dense_kv, read_layer_pages
+from rclc.capture.pages import DenseKV, ExtractSpec, LayerPages, extract_dense_kv, read_layer_pages
 
 
 @dataclass

@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING, Literal, Protocol
 
 import torch
 
-from rcc._async import run_in_worker
-from rcc._cache import cache_kv, clone_cache
-from rcc.latent import latent_mass, latent_mass_sync
+from rclc._async import run_in_worker
+from rclc._cache import cache_kv, clone_cache
+from rclc.latent import latent_mass, latent_mass_sync
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 ReasoningContext = Literal["full", "full_with_request", "selected", "selected_with_request"]
 # Default assert_close tolerances, so recomputed prefixes may differ by kernel roundoff.
@@ -58,7 +58,7 @@ def resolve_options(
 
 def _validate_result(state: SenderState, result: SenderState, maximum: int) -> None:
     """Check append-only rows, metadata and cache geometry at the callable boundary."""
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
     if type(result) is not SenderState:
         raise ValueError("reasoning must return a SenderState")

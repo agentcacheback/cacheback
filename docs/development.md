@@ -21,7 +21,7 @@ small enough to run at every Git gate; there is no affected-test scheduler.
 | Rule | Enforcement |
 | --- | --- |
 | Deterministic formatting, imports, docstrings, lint and no library prints | Ruff |
-| Strict library types | Pyright over `src/rcc` |
+| Strict library types | Pyright over `src/rclc` |
 | Warn over 400 nonblank lines; block over 600 | `scripts/check_file_size.py` |
 | Fewer than three consecutive comment lines | `scripts/check.py` |
 | No punctuation dashes or invisible Unicode characters in source/docs | `scripts/check.py` |
@@ -149,7 +149,7 @@ All four combinations also passed for the release source on Colab Linux on
 2026-09-28: 27 CPU tests per combination plus the full harness and dependency
 checks ([results](validation/release-a100/summary.json)). The validation environments
 include pip because the notebook tests record `pip freeze`. The initial public
-snapshot passed [Ubuntu CI](https://github.com/agentcacheback/rclc/actions/runs/36208175275).
+snapshot passed [Ubuntu CI](https://github.com/agentcacheback/cacheback/actions/runs/36208175275).
 Local checks also passed on macOS Apple Silicon with Python 3.11 and CPU PyTorch.
 
 On a Windows machine, use Ubuntu under WSL2 for these Linux checks. This does
@@ -178,7 +178,7 @@ model families remain untested end to end.
 
 ## Package release
 
-The distribution is `rclc`; import it as `rcc`. Version 0.1.0 remains unpublished.
+The distribution and import name are `rclc`. Version 0.1.0 remains unpublished.
 Do not publish until the default vLLM GPU gate above passes and the full CPU
 matrix is green for the release commit. Keep the paper branch unchanged.
 
@@ -204,4 +204,4 @@ interactive password prompt; never put credentials in a command or commit:
 
 PyPI owns the final name-availability decision. Do not use `rcc`: that name
 belongs to an unrelated package. A future release needs a new version in both
-`pyproject.toml` and `src/rcc/__init__.py`; PyPI versions cannot be overwritten.
+`pyproject.toml` and `src/rclc/__init__.py`; PyPI versions cannot be overwritten.

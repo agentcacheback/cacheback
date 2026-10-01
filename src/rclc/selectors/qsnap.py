@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 
 import torch
 
-from rcc.selectors import _support
-from rcc.selectors.cacheback import check_context, finite
-from rcc.selectors.fixed_spans import keep_spans, selects
+from rclc.selectors import _support
+from rclc.selectors.cacheback import check_context, finite
+from rclc.selectors.fixed_spans import keep_spans, selects
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 
 def qsnap_scores(sender: SenderState, request_ids: torch.Tensor) -> torch.Tensor:

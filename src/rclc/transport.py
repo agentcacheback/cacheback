@@ -12,16 +12,16 @@ from typing import TYPE_CHECKING, Any, cast
 
 import torch
 
-from rcc._async import run_in_worker
-from rcc.latent import selected_state
-from rcc.message import Message, Representation, encode_message
-from rcc.reasoning import Reasoning, ReasoningContext, apply_reasoning, resolve_options
-from rcc.selection import record_selection as capture_selection
-from rcc.selection import selection_html
-from rcc.selectors import Selector, cacheback, chunkkv, qsnap
+from rclc._async import run_in_worker
+from rclc.latent import selected_state
+from rclc.message import Message, Representation, encode_message
+from rclc.reasoning import Reasoning, ReasoningContext, apply_reasoning, resolve_options
+from rclc.selection import record_selection as capture_selection
+from rclc.selection import selection_html
+from rclc.selectors import Selector, cacheback, chunkkv, qsnap
 
 if TYPE_CHECKING:
-    from rcc.hf import Agent, HFReceiver, PreparedRequest
+    from rclc.hf import Agent, HFReceiver, PreparedRequest
 
 # Snapshots and selection serialize; use separate processes for model isolation.
 _PREPARATION_LOCK = threading.Lock()
@@ -262,7 +262,7 @@ def _receiver_plans(
     senders: list[SenderState], receivers: list[Receiver], requests: list[str | torch.Tensor]
 ) -> list[list[PreparedRequest | None]]:
     """Snapshot configured prompts and validate every receiver before selecting anything."""
-    from rcc.hf import HFReceiver
+    from rclc.hf import HFReceiver
 
     for receiver in receivers:
         if isinstance(receiver, HFReceiver):
@@ -327,7 +327,7 @@ def transfer_sync(
     except RuntimeError:
         pass
     else:
-        raise RuntimeError("use await rcc.transfer(...) inside a running event loop")
+        raise RuntimeError("use await rclc.transfer(...) inside a running event loop")
     return asyncio.run(
         transfer(
             sender,
@@ -401,7 +401,7 @@ def _snapshot_transfer(
     list[list[PreparedRequest | None]],
 ]:
     """Snapshot participating state and receiver prompts before reasoning or selection."""
-    from rcc.hf import Agent
+    from rclc.hf import Agent
 
     with _PREPARATION_LOCK:
         sources = [sender] if isinstance(sender, (SenderState, Agent)) else list(sender)

@@ -15,14 +15,14 @@
   <link rel="canonical" href="https://agentcacheback.github.io/">
   <title>CacheBack | Receiver-conditioned communication</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c211e'/%3E%3Cpath d='M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z' fill='%230f766e'/%3E%3Cpath d='M18 18h7v7h-7z' fill='%23fff'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="website/assets/styles.css?v=compact-3">
+  <link rel="stylesheet" href="website/assets/styles.css?v=lean-1">
   <script type="module" src="website/assets/app.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header wrap">
-    <a class="brand" href="#" aria-label="RCLC home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>RCLC</a>
-    <nav aria-label="Main navigation"><a href="#abstract">Overview</a><a href="#idea">Method</a><a href="#results">Results</a><a href="#demo">Demos</a></nav>
+    <a class="brand" href="#" aria-label="CacheBack home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>CacheBack</a>
+    <nav aria-label="Main navigation"><a href="#abstract">Overview</a><a href="#results">Results</a><a href="#demo">Demos</a></nav>
   </header>
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
@@ -39,7 +39,7 @@
         <p class="contribution">Our simplest implementation of receiver-conditioning: <strong>robust and training-free.</strong></p>
         <nav class="resource-links" aria-label="Project resources">
           <a href="https://arxiv.org/pdf/2609.32046">Paper <span>PDF</span></a>
-          <a href="https://github.com/agentcacheback/rclc">Code</a>
+          <a href="https://github.com/agentcacheback/cacheback">Code</a>
           <a href="#demo">Watch demo</a>
           <a href="https://arxiv.org/abs/2609.32046">arXiv</a>
           <a href="#citation" id="cite-link">Cite</a>
@@ -58,71 +58,35 @@
         <div class="paired-metrics chart-axes" aria-hidden="true"><div class="chart-axis"><span>0</span><span>50</span><span>100</span></div><div class="chart-axis"><span>0</span><span>800</span><span>1,600</span></div></div>
       </figure>
 
-      <details class="technical"><summary>Experimental setup</summary><p>pp means percentage points. Timing bars share a 0-1,600 second scale across all four models. Speedup is the text median completion time divided by the CacheBack median completion time.</p><p><strong>rX is the compression factor:</strong> keep about 1 in X positions from the sender’s processed sequence. <strong>r4 keeps 25%.</strong></p><p class="results-note" id="results-note">FanOutQA · Qwen 3 8B r4, Nemotron Nano 2 12B r8, Gemma 4 12B r4, and Ministral 3 14B r32 · 50 concurrent tasks on 8 H100 GPUs. Accuracy averaged over three receiver draws. Completion includes queueing and final answer generation.</p><p>These are selected operating points. Each family keeps its receiver fixed; the baseline uses a same-size text sender. GPU allocation differs by communication channel. Strict accuracy requires all reference-answer groups. Values are point estimates; see the paper for variability, full frontiers, smaller text senders, and the LongBench v2 chain experiments.</p><p>The title’s 94% refers to r16: one in sixteen sender positions retained, or 93.75% removed. The Qwen numbers above use r4, which removes 75%. Position reduction is not the same quantity as total GPU memory saved. <a href="https://arxiv.org/pdf/2609.32046#page=7">Published results</a> · <a href="website/assets/results.json">Download these data</a></p></details>
+      <details class="technical"><summary>Experimental setup</summary><p>pp means percentage points. Timing bars share a 0-1,600 second scale. Speedup compares median completion times.</p><p><strong>rX is the compression factor:</strong> keep about 1 in X positions from the sender’s processed sequence. <strong>r4 keeps 25%.</strong></p><p class="results-note" id="results-note">FanOutQA · Qwen 3 8B r4, Nemotron Nano 2 12B r8, Gemma 4 12B r4, and Ministral 3 14B r32 · 50 concurrent tasks on 8 H100 GPUs. Accuracy averaged over three receiver draws. Completion includes queueing and final answer generation.</p><p>Selected operating points with a fixed receiver and same-size text sender; GPU allocation differs by channel. Strict accuracy requires all reference-answer groups. See the paper for full frontiers and variability.</p><p>The title’s 94% refers to r16: one in sixteen sender positions retained, or 93.75% removed. The Qwen numbers above use r4, which removes 75%. Position reduction is not the same quantity as total GPU memory saved. <a href="https://arxiv.org/pdf/2609.32046#page=7">Published results</a> · <a href="website/assets/results.json">Download these data</a></p></details>
       </aside>
     </section>
     <section id="abstract" class="abstract-section wrap" aria-labelledby="abstract-title">
-      <div class="abstract-label"><h2 id="abstract-title">TL;DR</h2><a class="text-link" href="https://arxiv.org/abs/2609.32046v1">Read the paper</a></div>
-      <div>
-        <div class="tldr">
-          <p>Written messages between agents can lose evidence; passing their entire internal state becomes expensive. <strong>Receiver-conditioning lets the receiver describe what it needs, so the sender can select what to pass on.</strong> CacheBack is our simplest, robust, training-free implementation.</p>
-          <p>On FanOutQA with Qwen 3 8B, CacheBack sends <strong>75% fewer positions than full-state transfer</strong>. Compared with same-size text communication, strict accuracy improves by <strong>14.7 percentage points</strong> and median completion is <strong>3.2× faster</strong>.</p>
-        </div>
-        <details class="full-abstract"><summary>Read the full abstract</summary>
-      <div class="abstract-text">
-        <p>Multi-agent systems distribute large contexts across agents that communicate to solve a task. Text messages are compact but require decoding and may omit evidence the receiving agent needs. Recent latent communication instead transfers KV caches. This avoids text generation and can improve accuracy and latency. However, <strong>a full KV cache grows linearly with both the context an individual agent processes, and the number of agents that coordinate together.</strong></p>
-        <p>This raises memory and context costs, often far exceeding available GPU resources and context window sizes. Our key observation is that <mark>agents need only send what the receiving agent requires for its local task</mark> -- which we call <strong class="rclc-emphasis">receiver-conditioned communication.</strong> The receiver agent passes the sender a small description of its information needs, which serves to filter and compress the sender agent's KV cache.</p>
-        <p><strong>CacheBack is a simple, robust, training-free instance of receiver conditioning</strong> based on the sender's attention weights. On FanOutQA, CacheBack with Qwen 3 removes <strong class="result-highlight">75% of the state</strong> the agent would otherwise receive, improving accuracy by <strong class="result-highlight">14.7 percentage points</strong> and reducing median task-completion latency by <strong class="result-highlight">3.2×</strong> relative to text communication. We show comparable improvements across model families that span dense Transformers, Mamba-attention hybrids, and sliding-window attention.</p>
-        <p class="abstract-note">A KV cache stores intermediate state from the text a model has processed. Abstract from the <a href="https://arxiv.org/abs/2609.32046v1">published paper</a>, by Rossi et al. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>; emphasis added.</p>
-      </div>
-        </details>
-      </div>
-    </section>
-    <section id="idea" class="section wrap" aria-labelledby="idea-title">
-      <div class="section-heading method-heading">
-        <h2 id="idea-title">How it works</h2>
-        <p>The receiver describes what it needs for its next task. CacheBack uses that request to select part of the sender’s internal numerical state, or <strong>latent state</strong>, to send back.</p>
-      </div>
-      <figure class="handoff" aria-label="Receiver-conditioning: the receiver sends a request to the sender; the sender selects state using that request and returns selected latent state to the receiver.">
-        <div class="handoff-flow">
-          <div class="handoff-party"><h3>Sender</h3><p>Select state using<br>the request</p></div>
-          <div class="handoff-messages" aria-hidden="true">
-            <div class="handoff-request"><span>01</span> Request<i></i></div>
-            <div class="handoff-state"><span>02</span> Selected latent state<i></i></div>
-          </div>
-          <div class="handoff-party handoff-receiver"><h3>Receiver</h3><p>Has the next task</p></div>
-        </div>
-        <figcaption class="selector-note">
-          <h3>CacheBack</h3>
-          <p><strong>Our simplest implementation.<br>Robust and training-free.</strong></p>
-          <p>Uses attention to the receiver’s request to score sender positions, then selects a subset within the message budget.</p>
-        </figcaption>
-      </figure>
-      <details class="technical"><summary>What crosses the handoff?</summary><p>CacheBack selects positions using the sender’s attention to the receiver’s request. In the paper’s selected-embedding channel, the corresponding input vectors are sent and the receiver rebuilds its KV cache. A position is not an isolated fact, and an attention score is not a guarantee of relevance. The experiments use matching models; cross-model translation is outside this work. <a href="https://arxiv.org/html/2609.32046v1">Read the method and limitations.</a></p></details>
+      <figure class="overview-figure"><a href="https://arxiv.org/pdf/2609.32046" aria-label="Read Figure 2 in the paper"><img src="website/assets/figures/communication-overview.webp" width="1600" height="393" loading="lazy" alt="Figure 2: sending every agent's full cache exceeds the receiver's context limit. CacheBack sends selected positions and latent steps, leaving room for the receiver's prompt."></a><figcaption>Figure 2. Select what the receiver needs, instead of accumulating every sender’s context.</figcaption></figure>
+      <div class="tldr"><h2 id="abstract-title">TL;DR</h2><p>Agents can share <strong>internal model state</strong> instead of writing reports. Sending all of it, however, overwhelms the receiver.</p><p><strong>The receiver asks for what it needs.</strong> CacheBack uses attention to that request to select which state gets sent. Simple, robust, and training-free.</p></div>
     </section>
     <section id="results" class="section wrap" aria-labelledby="results-title">
-      <div class="section-heading"><h2 id="results-title">Results</h2><p>On <strong>FanOutQA</strong>, three agents read separate sources and send state to one answering agent. These curves compare accuracy and completion time across message budgets and text-sender sizes.</p></div>
+      <h2 id="results-title">Results</h2>
       <div class="paper-curves" id="paper-curves">
-        <div class="curves-heading"><h3>Accuracy and completion time</h3><p><strong>Higher is more accurate. Further left is faster.</strong> Each point is a measured setting; lines join the best observed tradeoffs within each method. Text points vary sender size; CacheBack points vary compression or message budget. The receiver stays fixed.</p><p id="compression-guide"><strong class="rclc-emphasis">Reading r4, r8, r16:</strong> rX means keeping about <strong>1/X of the sender’s sequence positions</strong>. For example, <strong>r4 keeps 25%</strong>, <strong>r8 keeps 12.5%</strong>, and <strong>r16 keeps 6.25%</strong>. Larger numbers mean more compression and a smaller message.</p></div>
+        <div class="curves-heading"><h3>FanOutQA</h3><p id="compression-guide">Three senders read separate sources; one receiver answers. <strong>Higher is more accurate; left is faster.</strong> CacheBack points vary message size; text points vary sender size. <strong>rX keeps 1/X of the sender’s positions: r4 keeps 25%.</strong></p></div>
         <div class="curve-legend" aria-label="Curve legend"><span class="rclc-emphasis">● ━ CacheBack</span><span class="text-emphasis">▲ ┄ Text communication</span><span>× Question only</span></div>
         <div class="curve-grid">
-          <figure><img src="website/assets/figures/fanoutqa-qwen.svg" width="560" height="460" loading="lazy" alt="FanOutQA, Qwen 3 8B: CacheBack r4 reaches 55.3% strict accuracy at 192 seconds, compared with 40.7% at 612 seconds for same-size text; weaker settings are also plotted."><figcaption>Qwen 3: r4 improves strict accuracy from <strong>40.7% to 55.3%</strong> and median completion from <strong>612 to 192 seconds.</strong></figcaption></figure>
-          <figure><img src="website/assets/figures/fanoutqa-nemotron.svg" width="560" height="460" loading="lazy" alt="FanOutQA, Nemotron Nano 2 12B: CacheBack r8 reaches 50% accuracy near 102 seconds versus 38.7% near 131 seconds for same-size text. A smaller text sender is faster at lower accuracy."><figcaption>Nemotron: the benefit also appears in a model combining Mamba and attention. <strong>A smaller text sender is faster, but less accurate.</strong></figcaption></figure>
+          <figure><img src="website/assets/figures/fanoutqa-qwen.svg" width="560" height="460" loading="lazy" alt="FanOutQA, Qwen 3 8B: CacheBack r4 reaches 55.3% strict accuracy at 192 seconds, compared with 40.7% at 612 seconds for same-size text; weaker settings are also plotted."></figure>
+          <figure><img src="website/assets/figures/fanoutqa-nemotron.svg" width="560" height="460" loading="lazy" alt="FanOutQA, Nemotron Nano 2 12B: CacheBack r8 reaches 50% accuracy near 102 seconds versus 38.7% near 131 seconds for same-size text. A smaller text sender is faster at lower accuracy."></figure>
         </div>
-        <details class="chain-results" id="chain-results"><summary>Repeated handoffs: LongBench v2</summary><div class="curves-heading"><p>On <strong>LongBench v2 Easy</strong>, four agents read successive sections of a long document. A final receiver answers from the last handoff. Evidence from the beginning must survive the chain.</p><p>A <strong>relative budget</strong> uses the rX fraction above, so message size grows with the sender’s context. A <strong>fixed budget</strong> caps the number of message positions, as in the labels “32K fixed” and “64K fixed”.</p></div>
+        <div class="chain-results" id="chain-results"><div class="curves-heading"><h3>LongBench v2 Easy</h3><p>Four agents read a long document in sequence, passing state to a final answering agent. Relative budgets (rX) grow with context; fixed budgets (32K, 64K) cap message positions. Stronger compression can reduce accuracy.</p></div>
         <div class="curve-legend" aria-label="LongBench curve legend"><span class="rclc-emphasis">● ━ CacheBack · relative budget</span><span class="fixed-emphasis">■ ━ CacheBack · fixed budget</span><span class="text-emphasis">▲ ┄ Text</span><span>× Question only</span></div>
         <div class="curve-grid">
-          <figure><img src="website/assets/figures/longbench-qwen.svg" width="560" height="460" loading="lazy" alt="LongBench v2 Easy, Qwen 3 8B: both relative and fixed CacheBack budgets include settings faster and more accurate than same-size text. Stronger compression eventually lowers accuracy."><figcaption>Qwen 3: both message-budget schemes improve the measured tradeoff. <strong>More aggressive compression eventually reduces accuracy.</strong></figcaption></figure>
-          <figure><img src="website/assets/figures/longbench-nemotron.svg" width="560" height="460" loading="lazy" alt="LongBench v2 Easy, Nemotron Nano 2 12B: CacheBack r8 reaches 48% accuracy near 133 seconds, while fixed-budget settings show a different tradeoff; smaller text senders can be faster."><figcaption>Nemotron: a <strong>fixed budget</strong> caps message positions; a <strong>relative budget</strong> grows with the material read. Neither denotes total GPU memory.</figcaption></figure>
+          <figure><img src="website/assets/figures/longbench-qwen.svg" width="560" height="460" loading="lazy" alt="LongBench v2 Easy, Qwen 3 8B: both relative and fixed CacheBack budgets include settings faster and more accurate than same-size text. Stronger compression eventually lowers accuracy."></figure>
+          <figure><img src="website/assets/figures/longbench-nemotron.svg" width="560" height="460" loading="lazy" alt="LongBench v2 Easy, Nemotron Nano 2 12B: CacheBack r8 reaches 48% accuracy near 133 seconds, while fixed-budget settings show a different tradeoff; smaller text senders can be faster."></figure>
         </div>
-        </details>
-        <p class="curve-caption">Redrawn from the paper’s plotting data for Qwen and Nemotron. Each benchmark uses 50 tasks submitted together on eight H100s; completion includes queueing. Accuracy averages three receiver draws. Qwen uses a 0 to 1,000 s time axis, Nemotron 0 to 400 s; each model keeps its scale across benchmarks. Figures <a href="https://arxiv.org/html/2609.32046v1#S4">5, 11, and 12 in the paper</a>.</p>
-        <p class="compression-note"><strong>About “94% CacheBack”:</strong> r16 retains one sender position in sixteen, removing 93.75%. The selected Qwen result above uses <strong>r4, or 75% fewer positions.</strong> Position reduction is not total GPU memory saved.</p>
+        </div>
+        <p class="curve-caption">50 concurrent tasks on 8 H100s; accuracy averaged over three receiver draws. Completion includes queueing. <a href="https://arxiv.org/pdf/2609.32046">Full setup and results in the paper.</a></p>
       </div>
     </section>
     <section id="demo" class="demo-section" aria-labelledby="demo-title">
       <div class="wrap">
-        <div class="demo-heading"><h2 id="demo-title">Watch the demo</h2><p>Seven workers help a coordinator fix a Django bug. Compare latent handoffs with written reports.</p></div>
+        <div class="demo-heading"><h2 id="demo-title">Watch the demo</h2></div>
         <article class="recorded-demo coding-demo" id="coding-demo" aria-labelledby="coding-title">
           <div class="demo-description"><div><p class="demo-type">36 seconds · 4K · Recorded coding task</p><h3 id="coding-title">Fixing a Django bug with seven coding agents</h3><p>Qwen3-8B produces the patch <strong class="rclc-emphasis">4.41× faster</strong> with CacheBack than with written reports on this case. Both runs make the same one-line code change and pass all 88 tests.</p></div></div>
           <div class="demo-player"><video id="coding-video" controls playsinline preload="none" tabindex="0" width="3840" height="2160" poster="demo/coding/poster.jpg" aria-labelledby="coding-title" aria-describedby="coding-caption">
@@ -152,38 +116,30 @@
 - "If she is collecting at Harbour Hub, a passport is required, and a driving licence is not accepted."</div></details>
             </article>
           </div>
-          <p class="demo-caption">Qwen3-8B · one A100 · r4 · one warm run per method. Times include three handoffs and final answer generation, excluding model loading, tokenization, and warmup. This recording is an example, not a benchmark. <a href="demo/trace-w4.json">Raw recording</a> · <a href="https://github.com/agentcacheback/rclc/blob/main/demo/README.md">Setup</a></p>
+          <p class="demo-caption">Qwen3-8B · one A100 · r4 · one warm run per method. Times include three handoffs and final answer generation, excluding model loading, tokenization, and warmup. This recording is an example, not a benchmark. <a href="demo/trace-w4.json">Raw recording</a> · <a href="https://github.com/agentcacheback/cacheback/blob/main/demo/README.md">Setup</a></p>
           <details class="demo-replay"><summary><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2v20l16-10z"/></svg>Replay the booking handoffs</summary>
             <div class="demo-replay-link"><a class="text-link" href="demo/index.html" target="_blank" rel="noopener noreferrer">Open full window <span aria-hidden="true">↗</span></a></div>
             <div class="demo-window"><iframe id="flagship-demo" src="demo/index.html?v=fit-3" title="Recorded CacheBack and text booking relay comparison, with playback controls" loading="lazy" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe></div>
           </details>
         </article>
-        <div class="upcoming-demos" hidden>
-          <article class="demo-slot" id="upcoming-demo-1" aria-labelledby="upcoming-title-1">
-            <div class="demo-slot-surface"><span class="mono">02</span><h3 id="upcoming-title-1">Demo in preparation</h3><p>Task details and recording to follow.</p></div>
-          </article>
-          <article class="demo-slot" id="upcoming-demo-2" aria-labelledby="upcoming-title-2">
-            <div class="demo-slot-surface"><span class="mono">03</span><h3 id="upcoming-title-2">Demo in preparation</h3><p>Task details and recording to follow.</p></div>
-          </article>
-        </div>
       </div>
     </section>
-    <section class="code-section" id="code" aria-labelledby="code-title"><div class="wrap code-layout"><div><h2 id="code-title">Quickstart</h2><p>Bind a sender and receiver to matching models, then pass the receiver’s request to <code>rcc.transfer</code>. CacheBack is the default selector. Continue generation with your model’s native API.</p><a class="button primary" href="https://github.com/agentcacheback/rclc">Code and documentation</a><p class="code-note">Local Qwen 3 weights, using Hugging Face or vLLM.<br>Hosted chat APIs do not expose the required state.</p></div><div class="code-card"><div class="code-bar"><span>Python</span><button class="copy-button" data-copy="quickstart" type="button">Copy code</button></div><pre><code id="quickstart"><span class="code-keyword">import</span> rcc
+    <section class="code-section" id="code" aria-labelledby="code-title"><div class="wrap code-layout"><div><h2 id="code-title">Use CacheBack</h2><p>Install <code>rclc</code>, bind your agents, and pass the receiver’s request.</p><a class="button primary" href="https://github.com/agentcacheback/cacheback">Code and documentation</a><p class="code-note">Local Qwen 3 weights, using Hugging Face or vLLM.<br>Hosted chat APIs do not expose the required state.</p></div><div class="code-card"><div class="code-bar"><span>Python</span><button class="copy-button" data-copy="quickstart" type="button">Copy code</button></div><pre><code id="quickstart"><span class="code-keyword">import</span> rclc
 
-sender = rcc.<span class="code-function">bind</span>(
+sender = rclc.<span class="code-function">bind</span>(
     model, tokenizer,
     messages=sender_history, backend=<span class="code-string">"hf"</span>,
 )
-receiver = rcc.<span class="code-function">bind</span>(
+receiver = rclc.<span class="code-function">bind</span>(
     model, tokenizer,
     messages=receiver_history, backend=<span class="code-string">"hf"</span>,
 )
-<span class="code-focus"><span class="code-keyword">await</span> rcc.<span class="code-function">transfer</span>(
+<span class="code-focus"><span class="code-keyword">await</span> rclc.<span class="code-function">transfer</span>(
     sender, receiver,
     <span class="code-string">"Who owns the Cedar booking?"</span>,
 )</span>
-inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class="snippet-note">Model, tokenizer, and histories loaded; run in an async function or notebook. <a href="https://github.com/agentcacheback/rclc/blob/main/examples/quickstart.py">Runnable quickstart</a></p></div></div></section>
-    <section id="paper" class="section wrap paper-section" aria-labelledby="paper-title"><div><p class="eyebrow">THE PAPER</p><h2 id="paper-title">Receiver-Conditioned Latent Communication gives 94% CacheBack</h2><p>Maximillian Rossi, Prajwal Raghunath, Haoqing Xuan, Yusen Zhang, and Eugene Wu.</p><div class="hero-actions"><a class="button primary" href="https://arxiv.org/pdf/2609.32046">Read the PDF</a><a class="text-link" href="https://github.com/agentcacheback/rclc/tree/paper">Reproduce the paper</a></div></div><details class="citation" id="citation"><summary>Cite this work <span>BibTeX</span></summary><button class="copy-button" data-copy="bibtex" type="button">Copy citation</button><pre><code id="bibtex">@misc{rossi2026cacheback,
+inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class="snippet-note">Model, tokenizer, and histories loaded; run in an async function or notebook. <a href="https://github.com/agentcacheback/cacheback/blob/main/examples/quickstart.py">Runnable quickstart</a></p></div></div></section>
+    <section id="paper" class="section wrap paper-section" aria-labelledby="paper-title"><div><p class="eyebrow">THE PAPER</p><h2 id="paper-title">Receiver-Conditioned Latent Communication gives 94% CacheBack</h2><p>Maximillian Rossi, Prajwal Raghunath, Haoqing Xuan, Yusen Zhang, and Eugene Wu.</p><div class="hero-actions"><a class="button primary" href="https://arxiv.org/pdf/2609.32046">Read the PDF</a><a class="text-link" href="https://github.com/agentcacheback/cacheback/tree/paper">Reproduce the paper</a></div></div><div class="citation" id="citation"><h3>Cite this work</h3><button class="copy-button" data-copy="bibtex" type="button">Copy citation</button><pre><code id="bibtex">@misc{rossi2026cacheback,
   title = {Receiver-Conditioned Latent Communication
            gives 94\% CacheBack},
   author = {Rossi, Maximillian and Raghunath, Prajwal
@@ -194,9 +150,9 @@ inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class=
   archivePrefix = {arXiv},
   primaryClass = {cs.AI},
   url = {https://arxiv.org/abs/2609.32046}
-}</code></pre></details></section>
+}</code></pre></div></section>
   </main>
-  <footer class="site-footer wrap"><a class="brand" href="#">CacheBack</a><span>Receiver-conditioned communication · 2026</span><a href="https://github.com/agentcacheback/rclc">Code &amp; reproducibility</a></footer>
+  <footer class="site-footer wrap"><a class="brand" href="#">CacheBack</a><span>Receiver-conditioned communication · 2026</span><a href="https://github.com/agentcacheback/cacheback">Code &amp; reproducibility</a></footer>
   <div id="copy-status" class="sr-only" role="status"></div>
 </body>
 </html>

@@ -9,9 +9,9 @@ the same quality.
 
 Write a callable that follows the
 [selector contract](docs/selectors.md#custom-selection) and pass it to
-`rcc.transfer(..., selector=my_selector)`.
+`rclc.transfer(..., selector=my_selector)`.
 
-For a contribution to the package, put the function in `src/rcc/selectors/`.
+For a contribution to the package, put the function in `src/rclc/selectors/`.
 Keep it small and leave sender state unchanged. Extend an existing end-to-end
 scenario to cover selection, delivery and receiver continuation; avoid a test
 per helper. Follow the [development harness](docs/development.md) and run:

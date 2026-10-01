@@ -18,11 +18,11 @@ assert.equal((html.match(/<h1\b/g) || []).length, 1, 'One page heading');
 assert.match(html, /<html lang="en">/);
 assert.match(html, /name="viewport"/);
 assert.match(html, /<title>CacheBack \|/);
-const sectionOrder = ['result-summary', 'abstract', 'idea', 'results', 'demo', 'code', 'paper'];
+const sectionOrder = ['result-summary', 'abstract', 'results', 'demo', 'code', 'paper'];
 sectionOrder.slice(1).forEach((id, i) => {
   assert.ok(html.indexOf(`id="${sectionOrder[i]}"`) < html.indexOf(`id="${id}"`), `Section order: ${id}`);
 });
-assert.equal((html.match(/<img src="website\/assets\/figures\//g) || []).length, 4);
+assert.equal((html.match(/<img src="website\/assets\/figures\//g) || []).length, 5);
 
 for (const [, url] of html.matchAll(/(?:href|src|poster)="([^"]+)"/g)) {
   if (/^(https:|data:)/.test(url)) continue;

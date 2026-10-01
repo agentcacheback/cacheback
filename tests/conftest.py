@@ -7,7 +7,7 @@ import torch
 from tokenizers import Tokenizer, models, pre_tokenizers
 from transformers import PreTrainedTokenizerFast, Qwen3Config, Qwen3ForCausalLM
 
-from rcc import SenderState
+from rclc import SenderState
 
 
 def tiny_config(attn_implementation: str = "sdpa") -> Qwen3Config:

@@ -6,11 +6,11 @@ from typing import Any
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from rcc import bind, transfer
+from rclc import bind, transfer
 
 
 async def handoff(model: Any, tokenizer: Any) -> str:
-    """Run the agents' native loops around a single RCC handoff."""
+    """Run the agents' native loops around a single RCLC handoff."""
     history = [
         {"role": "system", "content": "You track project decisions."},
         {"role": "user", "content": "Cedar launches October 12. Maya Chen owns the release."},
@@ -24,7 +24,7 @@ async def handoff(model: Any, tokenizer: Any) -> str:
     ids = tokenizer.apply_chat_template(history, return_tensors="pt", return_dict=True)[
         "input_ids"
     ].to(model.device)
-    # This prefill belongs to the existing sender loop; RCC reuses its exact cache.
+    # This prefill belongs to the existing sender loop; RCLC reuses its exact cache.
     with torch.inference_mode():
         cache = model.model(input_ids=ids, use_cache=True).past_key_values
     sender = bind(model, tokenizer, prompt=ids, past_key_values=cache, backend="hf")

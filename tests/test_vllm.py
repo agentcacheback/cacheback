@@ -10,10 +10,10 @@ import torch
 from tests.conftest import tiny_config
 from transformers import Qwen3ForCausalLM
 
-from rcc import latent_mass, transfer_sync
-from rcc._cache import cache_kv
-from rcc.capture import connector
-from rcc.vllm import binding_model, prefill_state, sender_from_vllm
+from rclc import latent_mass, transfer_sync
+from rclc._cache import cache_kv
+from rclc.capture import connector
+from rclc.vllm import binding_model, prefill_state, sender_from_vllm
 
 
 def test_vllm_capture_layouts_aliasing_and_explicit_unstable_opt_in(
@@ -329,7 +329,7 @@ def test_vllm_capture_layouts_aliasing_and_explicit_unstable_opt_in(
         assert len(captured_rows) == 5
         assert torch.equal(captured_rows[0], model.get_input_embeddings()(ids))
         assert not connector._REQUESTED and not connector._EXTRACTED
-        from rcc import bind
+        from rclc import bind
 
         tokenizer = senders[0].tokenizer
         tokenizer.chat_template = "{% for m in messages %}{{ m['content'] }} {% endfor %}?"
@@ -389,7 +389,7 @@ def test_vllm_capture_layouts_aliasing_and_explicit_unstable_opt_in(
             patch.setattr(engine.vllm_config.model_config, "enable_prompt_embeds", False)
             with pytest.raises(ValueError, match="enable_prompt_embeds"):
                 bind(llm, backend="vllm")
-            from rcc import check
+            from rclc import check
 
             assert any("enable_prompt_embeds" in issue for issue in check(agent)["issues"])
 

@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, TypeAlias
 
 import torch
 
-from rcc.selectors.cacheback import cacheback
-from rcc.selectors.chunkkv import chunkkv
-from rcc.selectors.qsnap import qsnap
+from rclc.selectors.cacheback import cacheback
+from rclc.selectors.chunkkv import chunkkv
+from rclc.selectors.qsnap import qsnap
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 Selector: TypeAlias = Callable[["SenderState", torch.Tensor, int], Sequence[int] | torch.Tensor]
 

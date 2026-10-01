@@ -17,8 +17,8 @@ import torch
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from rcc import Delivery, SenderState, transfer_sync
-from rcc.selectors import cacheback
+from rclc import Delivery, SenderState, transfer_sync
+from rclc.selectors import cacheback
 
 DOCUMENTS = [
     {

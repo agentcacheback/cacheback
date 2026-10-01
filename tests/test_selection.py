@@ -11,21 +11,21 @@ from typing import Any
 import pytest
 import torch
 
-import rcc
+import rclc
 
 
 def test_recorded_selection_survives_fan_in_reasoning_and_native_generation(
-    senders: list[rcc.SenderState], tmp_path: Path, monkeypatch: Any
+    senders: list[rclc.SenderState], tmp_path: Path, monkeypatch: Any
 ) -> None:
     model, tokenizer = senders[0].model, senders[0].tokenizer
     tokenizer.add_tokens(["<script>alert(1)</script>"])
     tokenizer.chat_template = "{% for m in messages %}{{ m['content'] }} {% endfor %}?"
-    source = rcc.sender_from_hf(
+    source = rclc.sender_from_hf(
         model, tokenizer, "Who owns Cedar ? Who owns <script>alert(1)</script> ?"
     )
-    sources = [source, rcc.sender_from_hf(model, tokenizer, "When Birch launches ? " * 3)]
+    sources = [source, rclc.sender_from_hf(model, tokenizer, "When Birch launches ? " * 3)]
 
-    def choose(state: rcc.SenderState, query: torch.Tensor, budget: int) -> list[int]:
+    def choose(state: rclc.SenderState, query: torch.Tensor, budget: int) -> list[int]:
         return [len(state.input_embeds) - 1, 6, 2, 0]
 
     async def journey() -> None:
@@ -34,20 +34,20 @@ def test_recorded_selection_survives_fan_in_reasoning_and_native_generation(
                 {}
                 if context is None
                 else {
-                    "reasoning": partial(rcc.latent_mass, steps=2),
+                    "reasoning": partial(rclc.latent_mass, steps=2),
                     "reasoning_context": context,
                     "reasoning_budget": 2,
                 }
             )
             for representation in ("embeddings", "token_ids+continuous"):
-                receiver = rcc.bind(model, tokenizer, max_new_tokens=2)
-                baseline: list[rcc.Delivery] = []
-                recorded: list[rcc.Delivery] = []
+                receiver = rclc.bind(model, tokenizer, max_new_tokens=2)
+                baseline: list[rclc.Delivery] = []
+                recorded: list[rclc.Delivery] = []
                 warning = (
                     pytest.warns(UserWarning) if representation != "embeddings" else nullcontext()
                 )
                 with warning:
-                    await rcc.transfer(
+                    await rclc.transfer(
                         sources,
                         baseline.append,
                         ["Who owns Cedar ?", "When Birch launches ?"],
@@ -56,7 +56,7 @@ def test_recorded_selection_survives_fan_in_reasoning_and_native_generation(
                         representation=representation,
                         **options,
                     )
-                    await rcc.transfer(
+                    await rclc.transfer(
                         sources,
                         [receiver, recorded.append],
                         ["Who owns Cedar ?", "When Birch launches ?"],
@@ -111,7 +111,7 @@ def test_recorded_selection_survives_fan_in_reasoning_and_native_generation(
                             right.positions
                             == len(selection.indices) + selection.added_latent_positions
                         )
-                peer = rcc.bind(model, tokenizer, max_new_tokens=2)
+                peer = rclc.bind(model, tokenizer, max_new_tokens=2)
                 peer(baseline[0])
                 left, right = peer.pop(), receiver.pop()
                 a = model.generate(**left, do_sample=False, pad_token_id=0)
@@ -120,9 +120,9 @@ def test_recorded_selection_survives_fan_in_reasoning_and_native_generation(
                 assert len(receiver) == 1
                 with pytest.raises(ValueError, match="request_index"):
                     receiver.selection_html(1)
-        unknown: list[rcc.Delivery] = []
+        unknown: list[rclc.Delivery] = []
         state = replace(senders[0], token_ids=None)
-        await rcc.transfer(
+        await rclc.transfer(
             state, unknown.append, "Who owns Cedar ?", selector=choose, record_selection=True
         )
         selection = unknown[0].messages[0].selection
@@ -131,8 +131,8 @@ def test_recorded_selection_survives_fan_in_reasoning_and_native_generation(
         assert all(span["text"] is None for span in selection.spans)
         ids = senders[0].token_ids.clone()
         ids[0] = -1
-        continuous: list[rcc.Delivery] = []
-        await rcc.transfer(
+        continuous: list[rclc.Delivery] = []
+        await rclc.transfer(
             replace(senders[0], token_ids=ids),
             continuous.append,
             source.request_ids("Who owns Cedar ?"),

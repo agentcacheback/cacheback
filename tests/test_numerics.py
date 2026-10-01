@@ -2,8 +2,8 @@
 
 import torch
 
-from rcc.selectors.cacheback import support_score
-from rcc.selectors.fixed_spans import fixed_span_keep
+from rclc.selectors.cacheback import support_score
+from rclc.selectors.fixed_spans import fixed_span_keep
 
 
 def test_support_dose_and_zero_energy_have_known_answers() -> None:
