@@ -142,7 +142,7 @@ iframe { display:block; width:100%; height:815px; border:0; background:#fff; }
 .code-layout .code-note { font-size:12px; margin-top:23px; }
 .code-card { background:#162c2c; color:#e8f3f2; border-radius:12px; overflow:hidden; min-width:0; }
 .code-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid #345151; padding:12px 24px; color:#b6cdcb; font-size:12px; }
-.copy-button { border:1px solid var(--line); background:transparent; border-radius:3px; padding:5px 10px; font-size:12px; }
+.copy-button { border:0; background:transparent; border-radius:3px; padding:5px 10px; font-size:12px; }
 .copy-button:hover { background:var(--accent); }
 .code-card .copy-button { border:0; border-radius:7px; background:#2d4c4b; color:#e8f3f2; padding:6px 11px; }
 .code-card .copy-button:hover { background:#e8f3f2; color:#162c2c; }
