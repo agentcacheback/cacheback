@@ -15,7 +15,7 @@
   <link rel="canonical" href="https://agentcacheback.github.io/">
   <title>CacheBack | Receiver-conditioned communication</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c211e'/%3E%3Cpath d='M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z' fill='%230f766e'/%3E%3Cpath d='M18 18h7v7h-7z' fill='%23fff'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="website/assets/styles.css?v=lean-1">
+  <link rel="stylesheet" href="website/assets/styles.css?v=lean-2">
   <script type="module" src="website/assets/app.js"></script>
 </head>
 <body>
@@ -35,8 +35,6 @@
           <p class="affiliations"><a href="https://daplab.cs.columbia.edu/"><img src="https://daplab.cs.columbia.edu/files/images/daplab_logo_horiz.png" width="1508" height="331" alt="DAP Lab"></a><span>Columbia University</span></p>
         </div>
         <p class="hero-intro"><strong>The receiver asks for <span class="rclc-emphasis">what it needs.</span></strong></p>
-        <p class="hero-description">CacheBack uses that request to select which internal state gets sent.</p>
-        <p class="contribution">Our simplest implementation of receiver-conditioning: <strong>robust and training-free.</strong></p>
         <nav class="resource-links" aria-label="Project resources">
           <a href="https://arxiv.org/pdf/2609.32046">Paper <span>PDF</span></a>
           <a href="https://github.com/agentcacheback/cacheback">Code</a>
@@ -61,9 +59,24 @@
       <details class="technical"><summary>Experimental setup</summary><p>pp means percentage points. Timing bars share a 0-1,600 second scale. Speedup compares median completion times.</p><p><strong>rX is the compression factor:</strong> keep about 1 in X positions from the sender’s processed sequence. <strong>r4 keeps 25%.</strong></p><p class="results-note" id="results-note">FanOutQA · Qwen 3 8B r4, Nemotron Nano 2 12B r8, Gemma 4 12B r4, and Ministral 3 14B r32 · 50 concurrent tasks on 8 H100 GPUs. Accuracy averaged over three receiver draws. Completion includes queueing and final answer generation.</p><p>Selected operating points with a fixed receiver and same-size text sender; GPU allocation differs by channel. Strict accuracy requires all reference-answer groups. See the paper for full frontiers and variability.</p><p>The title’s 94% refers to r16: one in sixteen sender positions retained, or 93.75% removed. The Qwen numbers above use r4, which removes 75%. Position reduction is not the same quantity as total GPU memory saved. <a href="https://arxiv.org/pdf/2609.32046#page=7">Published results</a> · <a href="website/assets/results.json">Download these data</a></p></details>
       </aside>
     </section>
+    <section id="demo" class="demo-section" aria-labelledby="demo-title">
+      <div class="wrap">
+        <div class="demo-heading"><h2 id="demo-title">Watch the demo</h2></div>
+        <article class="recorded-demo coding-demo" id="coding-demo" aria-labelledby="coding-title">
+          <div class="demo-description"><div><p class="demo-type">36 seconds · 4K · Recorded coding task</p><h3 id="coding-title">Fixing a Django bug with seven coding agents</h3><p>Qwen3-8B produces the patch <strong class="rclc-emphasis">4.41× faster</strong> with CacheBack than with written reports on this case. Both runs make the same one-line code change and pass all 88 tests.</p></div></div>
+          <div class="demo-player"><video id="coding-video" controls playsinline preload="none" tabindex="0" width="3840" height="2160" poster="demo/coding/poster.jpg" aria-labelledby="coding-title" aria-describedby="coding-caption">
+            <source src="demo/coding/rclc-cacheback-4k.mp4" type="video/mp4">
+            <p><a href="demo/coding/rclc-cacheback-4k.mp4">Watch the demo as an MP4</a>.</p>
+          </video><button class="play-demo" id="play-demo" type="button" hidden><span aria-hidden="true">▶</span> Watch the full demo</button></div>
+          <div class="demo-caption" id="coding-caption"><p><strong>One recorded case:</strong> CacheBack 25.66 s; text 113.21 s. Startup and test grading excluded. Silent video; playback speed varies. <a href="demo/coding/rclc-cacheback-4k.mp4">Open in full window</a></p>
+            <details class="demo-evidence"><summary>Recording details and text description</summary><p>Seven Qwen3-8B workers pass information to a coordinator. The supplied bug report identifies a missing <code>save_m2m()</code> call in Django’s user creation form. Both runs add that call after saving the user. The CacheBack run finishes while the text workers are still generating reports.</p><p>The interface is reconstructed from separate recorded runs, aligned at their start. The final response and patch come from the recorded outputs. Both patches subsequently pass one new test and 87 regression tests; grading is outside the clocks. This is an individual demonstration, not an aggregate benchmark. <a href="demo/coding/evidence.json">Recorded results</a></p></details>
+          </div>
+        </article>
+      </div>
+    </section>
     <section id="abstract" class="abstract-section wrap" aria-labelledby="abstract-title">
       <figure class="overview-figure"><a href="https://arxiv.org/pdf/2609.32046" aria-label="Read Figure 2 in the paper"><img src="website/assets/figures/communication-overview.webp" width="1600" height="393" loading="lazy" alt="Figure 2: sending every agent's full cache exceeds the receiver's context limit. CacheBack sends selected positions and latent steps, leaving room for the receiver's prompt."></a><figcaption>Figure 2. Select what the receiver needs, instead of accumulating every sender’s context.</figcaption></figure>
-      <div class="tldr"><h2 id="abstract-title">TL;DR</h2><p>Agents can share <strong>internal model state</strong> instead of writing reports. Sending all of it, however, overwhelms the receiver.</p><p><strong>The receiver asks for what it needs.</strong> CacheBack uses attention to that request to select which state gets sent. Simple, robust, and training-free.</p></div>
+      <div class="tldr"><h2 id="abstract-title">TL;DR</h2><p>Agents can share <strong>internal model state</strong> instead of writing reports. Sending all of it, however, overwhelms the receiver.</p><p><strong>The receiver asks for what it needs.</strong> CacheBack uses attention to that request to select which state gets sent. Simple, robust, and <strong>training-free.</strong></p></div>
     </section>
     <section id="results" class="section wrap" aria-labelledby="results-title">
       <h2 id="results-title">Results</h2>
@@ -84,47 +97,13 @@
         <p class="curve-caption">50 concurrent tasks on 8 H100s; accuracy averaged over three receiver draws. Completion includes queueing. <a href="https://arxiv.org/pdf/2609.32046">Full setup and results in the paper.</a></p>
       </div>
     </section>
-    <section id="demo" class="demo-section" aria-labelledby="demo-title">
-      <div class="wrap">
-        <div class="demo-heading"><h2 id="demo-title">Watch the demo</h2></div>
-        <article class="recorded-demo coding-demo" id="coding-demo" aria-labelledby="coding-title">
-          <div class="demo-description"><div><p class="demo-type">36 seconds · 4K · Recorded coding task</p><h3 id="coding-title">Fixing a Django bug with seven coding agents</h3><p>Qwen3-8B produces the patch <strong class="rclc-emphasis">4.41× faster</strong> with CacheBack than with written reports on this case. Both runs make the same one-line code change and pass all 88 tests.</p></div></div>
-          <div class="demo-player"><video id="coding-video" controls playsinline preload="none" tabindex="0" width="3840" height="2160" poster="demo/coding/poster.jpg" aria-labelledby="coding-title" aria-describedby="coding-caption">
-            <source src="demo/coding/rclc-cacheback-4k.mp4" type="video/mp4">
-            <p><a href="demo/coding/rclc-cacheback-4k.mp4">Watch the demo as an MP4</a>.</p>
-          </video><button class="play-demo" id="play-demo" type="button" hidden><span aria-hidden="true">▶</span> Watch the full demo</button></div>
-          <div class="demo-caption" id="coding-caption"><p><strong>One recorded case:</strong> CacheBack 25.66 s; text 113.21 s. Startup and test grading excluded. Silent video; playback speed varies. <a href="demo/coding/rclc-cacheback-4k.mp4">Open in full window</a></p>
-            <details class="demo-evidence"><summary>Recording details and text description</summary><p>Seven Qwen3-8B workers pass information to a coordinator. The supplied bug report identifies a missing <code>save_m2m()</code> call in Django’s user creation form. Both runs add that call after saving the user. The CacheBack run finishes while the text workers are still generating reports.</p><p>The interface is reconstructed from separate recorded runs, aligned at their start. The final response and patch come from the recorded outputs. Both patches subsequently pass one new test and 87 regression tests; grading is outside the clocks. This is an individual demonstration, not an aggregate benchmark. <a href="demo/coding/evidence.json">Recorded results</a></p></details>
-          </div>
-        </article>
-        <article class="recorded-demo" id="booking-demo" aria-labelledby="booking-title">
-          <div class="demo-description"><div><p class="demo-type">Recorded model run</p><h3 id="booking-title">Where should Maya collect her pass on Friday, and what ID should she bring?</h3><p>Three documents contain the booking, a change of location, and the new desk’s ID rules. The final agent must connect all three.</p></div></div>
-          <div class="demo-outcomes">
-            <article class="demo-outcome">
-              <header><h4>CacheBack</h4><span class="outcome-time" id="demo-rclc-time">3.42 s</span></header>
-              <blockquote><p id="demo-rclc-answer">Maya should collect her pass at <strong>Harbour Hub</strong> on Friday, and she should bring a <strong>passport</strong> as her ID.</p></blockquote>
-              <details class="demo-evidence"><summary>Evidence quoted by the model</summary><div id="demo-rclc-evidence"><strong>Evidence:</strong>
-- "Reference J7 has moved to Harbour Hub."
-- "Harbour Hub requires a passport for replacement building pass collections."</div></details>
-            </article>
-            <article class="demo-outcome">
-              <header><h4>Text messages</h4><span class="outcome-time" id="demo-text-time">26.09 s</span></header>
-              <blockquote><p id="demo-text-answer">Maya should collect her pass at the assigned desk based on her reference J7, not at the Central Desk. She should check the Friday operations notice using her reference J7 to confirm the exact location. The ID she should bring depends on the desk where she collects her pass. If she is collecting at Harbour Hub, she must bring a passport, as a driving licence is not accepted. The name on the ID must match her booking, and the ID requirements for the specific desk apply. </p></blockquote>
-              <details class="demo-evidence"><summary>Evidence quoted by the model</summary><div id="demo-text-evidence"><strong>Evidence:</strong>
-- "Maya should collect her pass at the assigned desk based on her reference, not at the Central Desk."
-- "She should check the Friday operations notice using her reference J7 to confirm the exact location."
-- "If she is collecting at Harbour Hub, a passport is required, and a driving licence is not accepted."</div></details>
-            </article>
-          </div>
-          <p class="demo-caption">Qwen3-8B · one A100 · r4 · one warm run per method. Times include three handoffs and final answer generation, excluding model loading, tokenization, and warmup. This recording is an example, not a benchmark. <a href="demo/trace-w4.json">Raw recording</a> · <a href="https://github.com/agentcacheback/cacheback/blob/main/demo/README.md">Setup</a></p>
-          <details class="demo-replay"><summary><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2v20l16-10z"/></svg>Replay the booking handoffs</summary>
-            <div class="demo-replay-link"><a class="text-link" href="demo/index.html" target="_blank" rel="noopener noreferrer">Open full window <span aria-hidden="true">↗</span></a></div>
-            <div class="demo-window"><iframe id="flagship-demo" src="demo/index.html?v=fit-3" title="Recorded CacheBack and text booking relay comparison, with playback controls" loading="lazy" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe></div>
-          </details>
-        </article>
+    <section id="booking-demo" class="section wrap" aria-label="Interactive booking demo">
+      <div class="recorded-demo">
+        <div class="demo-replay-link"><a class="text-link" href="demo/index.html" target="_blank" rel="noopener noreferrer">Open full window <span aria-hidden="true">↗</span></a></div>
+        <div class="demo-window"><iframe id="flagship-demo" src="demo/index.html?v=fit-3" title="Recorded CacheBack and text booking relay comparison, with playback controls" loading="lazy" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe></div>
       </div>
     </section>
-    <section class="code-section" id="code" aria-labelledby="code-title"><div class="wrap code-layout"><div><h2 id="code-title">Use CacheBack</h2><p>Install <code>rclc</code>, bind your agents, and pass the receiver’s request.</p><a class="button primary" href="https://github.com/agentcacheback/cacheback">Code and documentation</a><p class="code-note">Local Qwen 3 weights, using Hugging Face or vLLM.<br>Hosted chat APIs do not expose the required state.</p></div><div class="code-card"><div class="code-bar"><span>Python</span><button class="copy-button" data-copy="quickstart" type="button">Copy code</button></div><pre><code id="quickstart"><span class="code-keyword">import</span> rclc
+    <section class="code-section" id="code" aria-labelledby="code-title"><div class="wrap code-layout"><div><h2 id="code-title">Use CacheBack</h2><p>Install <code>rclc</code>, bind your agents, and pass the receiver’s request.</p><a class="button primary" href="https://github.com/agentcacheback/cacheback">Code and documentation</a><p class="code-note">Local Qwen 3 weights, using Hugging Face or vLLM.<br>Hosted chat APIs do not expose the required state.</p></div><div class="code-card"><div class="code-bar"><span>Python</span><button class="copy-button" data-copy="quickstart" type="button" aria-label="Copy code"><svg class="copy-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span class="copy-feedback" aria-hidden="true">Copied</span></button></div><pre><code id="quickstart"><span class="code-keyword">import</span> rclc
 
 sender = rclc.<span class="code-function">bind</span>(
     model, tokenizer,
@@ -139,7 +118,7 @@ receiver = rclc.<span class="code-function">bind</span>(
     <span class="code-string">"Who owns the Cedar booking?"</span>,
 )</span>
 inputs = receiver.<span class="code-function">pop</span>()</code></pre><p class="snippet-note">Model, tokenizer, and histories loaded; run in an async function or notebook. <a href="https://github.com/agentcacheback/cacheback/blob/main/examples/quickstart.py">Runnable quickstart</a></p></div></div></section>
-    <section id="paper" class="section wrap paper-section" aria-labelledby="paper-title"><div><p class="eyebrow">THE PAPER</p><h2 id="paper-title">Receiver-Conditioned Latent Communication gives 94% CacheBack</h2><p>Maximillian Rossi, Prajwal Raghunath, Haoqing Xuan, Yusen Zhang, and Eugene Wu.</p><div class="hero-actions"><a class="button primary" href="https://arxiv.org/pdf/2609.32046">Read the PDF</a><a class="text-link" href="https://github.com/agentcacheback/cacheback/tree/paper">Reproduce the paper</a></div></div><div class="citation" id="citation"><h3>Cite this work</h3><button class="copy-button" data-copy="bibtex" type="button">Copy citation</button><pre><code id="bibtex">@misc{rossi2026cacheback,
+    <section id="paper" class="section wrap paper-section" aria-labelledby="paper-title"><div><p class="eyebrow">THE PAPER</p><h2 id="paper-title">Receiver-Conditioned Latent Communication gives 94% CacheBack</h2><p>Maximillian Rossi, Prajwal Raghunath, Haoqing Xuan, Yusen Zhang, and Eugene Wu.</p><div class="hero-actions"><a class="button primary" href="https://arxiv.org/pdf/2609.32046">Read the PDF</a><a class="text-link" href="https://github.com/agentcacheback/cacheback/tree/paper">Reproduce the paper</a></div></div><div class="citation" id="citation"><h3>Cite this work</h3><button class="copy-button" data-copy="bibtex" type="button" aria-label="Copy citation"><svg class="copy-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span class="copy-feedback" aria-hidden="true">Copied</span></button><pre><code id="bibtex">@misc{rossi2026cacheback,
   title = {Receiver-Conditioned Latent Communication
            gives 94\% CacheBack},
   author = {Rossi, Maximillian and Raghunath, Prajwal

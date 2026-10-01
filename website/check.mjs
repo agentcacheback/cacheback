@@ -18,7 +18,7 @@ assert.equal((html.match(/<h1\b/g) || []).length, 1, 'One page heading');
 assert.match(html, /<html lang="en">/);
 assert.match(html, /name="viewport"/);
 assert.match(html, /<title>CacheBack \|/);
-const sectionOrder = ['result-summary', 'abstract', 'results', 'demo', 'code', 'paper'];
+const sectionOrder = ['result-summary', 'demo', 'abstract', 'results', 'booking-demo', 'code', 'paper'];
 sectionOrder.slice(1).forEach((id, i) => {
   assert.ok(html.indexOf(`id="${sectionOrder[i]}"`) < html.indexOf(`id="${id}"`), `Section order: ${id}`);
 });
@@ -62,7 +62,6 @@ const speedups = [...html.matchAll(/<strong class="speedup">([\d.]+)× faster<\/
 assert.deepEqual(gains, Object.values(data.models).map(m => Number(((m.cache.accuracy - m.text.accuracy) * 100).toFixed(1))));
 assert.deepEqual(speedups, Object.values(data.models).map(m => Number((m.text.seconds / m.cache.seconds).toFixed(1))));
 assert.doesNotMatch(html, /name="model"/);
-assert.match(html, /This recording is an example, not a benchmark/);
 assert.match(html, /93\.75% removed/);
 assert.match(html, /loading="lazy" sandbox="allow-scripts allow-same-origin"/);
 assert.match(css, /prefers-reduced-motion:reduce/);
@@ -70,18 +69,12 @@ assert.match(css, /:focus-visible/);
 assert.match(html, /id="bibtex"/);
 assert.match(html, /<iframe[^>]+src="demo\/index\.html\?v=fit-3"/);
 assert.match(readFileSync(resolve(project, 'demo/index.html'), 'utf8'), /fetch\("trace-w4\.json"\)/);
-const recording = JSON.parse(readFileSync(resolve(project, 'demo/trace-w4.json'), 'utf8')).cases[0];
-const plain = text => text.replace(/<[^>]+>/g, '').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
-assert.ok(html.includes(`<h3 id="booking-title">${recording.question}</h3>`));
-for (const method of ['rclc', 'text']) {
-  const [answer, ...evidence] = recording[method].answer.text.split('\n\n');
-  for (const [part, tag, expected] of [['answer', 'p', answer], ['evidence', 'div', evidence.join('\n\n')]]) {
-    const displayed = html.match(new RegExp(`<${tag} id="demo-${method}-${part}">([\\s\\S]*?)</${tag}>`));
-    assert.ok(displayed, `Missing recorded ${method} ${part}`);
-    assert.equal(plain(displayed[1]), plain(expected.replace(/\*\*/g, '')), `Preserve the recorded ${method} ${part}`);
-  }
-  assert.ok(html.includes(`id="demo-${method}-time">${recording[method].seconds.toFixed(2)} s</span>`), `Measured ${method} completion time`);
-}
+// The booking record is rendered by the embedded replay, not duplicated in the page.
+const replay = readFileSync(resolve(project, 'demo/index.html'), 'utf8');
+assert.match(replay, /trace-w4\.json/);
+assert.match(html, /aria-label="Interactive booking demo"/);
+assert.doesNotMatch(html, /Recorded model run|demo-outcomes|hero-description|class="contribution"/);
+for (const label of ['Copy code', 'Copy citation']) assert.ok(html.includes(`aria-label="${label}"`));
 
 const coding = JSON.parse(readFileSync(resolve(project, 'demo/coding/evidence.json'), 'utf8')).arms;
 assert.ok(html.indexOf('id="coding-demo"') < html.indexOf('id="booking-demo"'), 'Coding video is the main demo');
