@@ -1,0 +1,54 @@
+{
+  "run_id": "bughunt-16333-run-20261001T051520Z",
+  "source": "s3://lce-pr2789-paper/rclc-demo/bughunt-16333-run-20261001T051520Z/",
+  "model": "Qwen/Qwen3-8B",
+  "issue": "django__django-16333",
+  "arms": {
+    "text": {
+      "seconds": 113.20635836,
+      "worker_seconds": 100.612943677,
+      "worker_done": [
+        100.612943677,
+        38.252793639,
+        25.637343035,
+        33.867839988,
+        22.492231897,
+        78.432600727,
+        29.442396709
+      ],
+      "status": "resolved",
+      "patch": "diff --git a/django/contrib/auth/forms.py b/django/contrib/auth/forms.py\n--- a/django/contrib/auth/forms.py\n+++ b/django/contrib/auth/forms.py\n@@ -141,6 +141,7 @@\n         user.set_password(self.cleaned_data[\"password1\"])\n         if commit:\n             user.save()\n+            self.save_m2m()\n         return user\n \n \n",
+      "new_tests_passed": 1,
+      "regression_tests_passed": 87,
+      "failed_tests": 0,
+      "handoff_bytes": 24969,
+      "handoff_rows": 0,
+      "coordinator_tokens": 1470,
+      "source_result": "s3://lce-pr2789-paper/rclc-demo/bughunt-16333-run-20261001T051520Z/text/result.json",
+      "source_grade": "s3://lce-pr2789-paper/rclc-demo/bughunt-16333-run-20261001T051520Z/grades/text.json"
+    },
+    "latent": {
+      "seconds": 25.66205141,
+      "worker_seconds": 6.196859804,
+      "worker_done": [
+        6.196859804,
+        6.093338203,
+        6.146028218,
+        6.18476604,
+        6.18007457,
+        5.908353919,
+        6.053007381
+      ],
+      "status": "resolved",
+      "patch": "diff --git a/django/contrib/auth/forms.py b/django/contrib/auth/forms.py\n--- a/django/contrib/auth/forms.py\n+++ b/django/contrib/auth/forms.py\n@@ -141,6 +141,7 @@\n         user.set_password(self.cleaned_data[\"password1\"])\n         if commit:\n             user.save()\n+            self.save_m2m()\n         return user\n \n \n",
+      "new_tests_passed": 1,
+      "regression_tests_passed": 87,
+      "failed_tests": 0,
+      "handoff_bytes": 675872768,
+      "handoff_rows": 82504,
+      "coordinator_tokens": 921,
+      "source_result": "s3://lce-pr2789-paper/rclc-demo/bughunt-16333-run-20261001T051520Z/latent/result.json",
+      "source_grade": "s3://lce-pr2789-paper/rclc-demo/bughunt-16333-run-20261001T051520Z/grades/latent.json"
+    }
+  }
+}

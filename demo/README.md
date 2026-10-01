@@ -1,9 +1,14 @@
-# CacheBack demo
+# CacheBack booking relay
+
+The replay labels the method CacheBack; `rclc` remains its recording key.
 
 Three agents pass evidence to a fourth. Maya's booking reference J7 leads to
 Harbour Hub, whose passport requirement overrides the original desk's ID advice.
 
 ## Watch
+
+The [booking section](../index.html#booking-demo), below the main coding video, presents the recorded final answers
+and completion times before the replay. Selected positions use teal highlights.
 
 Open <https://maxr0ssi.github.io/rclc/demo/> and press **Run**. To serve it
 locally, run this from the repository root and open <http://127.0.0.1:8765/demo/>:
@@ -22,8 +27,11 @@ intermediate messages, exact token origins and timings.
   `collection-id-rules.txt`. Each shows the source document with RCLC highlights
   and the generated text handoff. The last column shows both unedited answers
   and their total times.
-- Text boxes follow the newest generated line. Documents and messages scroll; on
-  a small screen, scroll the whole diagram horizontally.
+- Text boxes follow the newest generated line. Documents and messages scroll
+  within their compact panes. On smaller screens, agent cards form two columns,
+  then one on phones, with their agent labels repeated above the content.
+  An embedded replay resizes to its content, so its outer frame never needs
+  horizontal or vertical scrolling. Scroll the containing page normally.
 - **Replay** restarts. **Clear** stops playback and resets the highlights,
   messages and clocks.
 - The reviewed 8B answer shows `✓ Harbour Hub · Passport` when it finishes. The
@@ -33,7 +41,8 @@ intermediate messages, exact token origins and timings.
 Playback defaults to **1x**; **2x** and **4x** speed it up. Each method
 progresses independently from its measured handoff durations and total
 completion time, so the faster one finishes while the other keeps streaming, and
-the clocks show recorded time. Completion times are measured; streaming is
+the clocks show recorded time. Playback starts from the first animation-frame
+timestamp, keeping embedded-frame clock origins from producing negative time. Completion times are measured; streaming is
 illustrative. Text streams at an estimated constant character rate within each
 stage, because the recording has no per-token timestamps or separate
 prefill/decode timings. Reduced-motion preferences disable the highlight

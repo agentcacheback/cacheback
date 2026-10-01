@@ -3,7 +3,7 @@
 **Receiver-conditioned latent communication for agents.**
 
 Code for *Receiver-Conditioned Latent Communication gives 94% CacheBack*.
-**[Paper](https://arxiv.org/abs/2609.32046).** [Python API](https://github.com/maxr0ssi/rclc/blob/main/docs/api.md) · [Paper replication](https://github.com/maxr0ssi/rclc/blob/main/docs/replication.md)
+**[Website](https://maxr0ssi.github.io/rclc/)** · **[Paper](https://arxiv.org/abs/2609.32046)** · [Python API](https://github.com/maxr0ssi/rclc/blob/main/docs/api.md) · [Paper replication](https://github.com/maxr0ssi/rclc/blob/main/docs/replication.md)
 
 Agents distribute large contexts across senders and receivers. Text messages
 require decoding and can omit evidence. Full KV-cache messages accumulate every
@@ -18,18 +18,22 @@ that request to choose which sender positions enter the handoff.
 with 50 concurrent tasks on eight H100 GPUs. Operating points differ by family.
 Right: the receiver query guides which sender positions enter the handoff.*
 
-## Watch the handoff
+## Watch the demo
 
-**[▶ Try the demo in your browser](https://maxr0ssi.github.io/rclc/demo/)**
+**[▶ Watch the 36-second coding demo](https://maxr0ssi.github.io/rclc/#demo)**
 
-![Four-agent relay: RCLC highlights the source positions it hands off and answers correctly in 3.4 s; the text relay is still answering at 26 s.](https://raw.githubusercontent.com/maxr0ssi/rclc/main/docs/assets/demo.gif)
+[![CacheBack finishes a Django fix while text workers are still writing reports.](demo/coding/poster.jpg)](https://maxr0ssi.github.io/rclc/#demo)
 
-*Replayed at 2× from a recorded Qwen3-8B run on one A100.*
+Seven Qwen3-8B workers help a coordinator fix a Django bug. CacheBack completes
+this recorded case in **25.66 s**, versus **113.21 s** for text: **4.41× faster**.
+Both produce the same patch and subsequently pass all 88 tests. Startup and
+test grading are excluded from the clocks. The silent video reconstructs the
+interface from separate runs and varies playback speed. This is one case,
+not an aggregate benchmark. [Recorded results](demo/coding/evidence.json).
 
-The demo follows a booking through four agents and compares RCLC with a text
-relay. Latencies come from recorded runs, not a benchmark. The
-[demo guide](https://github.com/maxr0ssi/rclc/blob/main/demo/README.md) covers
-running it locally and recording your own.
+Also explore the [interactive booking relay](https://maxr0ssi.github.io/rclc/demo/)
+to inspect selected positions and text messages at each handoff. Its
+[demo guide](demo/README.md) covers recording your own.
 
 ## Install
 
