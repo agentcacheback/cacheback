@@ -10,7 +10,7 @@ from typing import Any
 import torch
 import torch.nn.functional as functional
 
-from rcc.selectors._capture import run_capture
+from rclc.selectors._capture import run_capture
 
 ROW_CHUNK = 256
 POOL_KERNEL = 7

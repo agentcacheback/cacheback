@@ -16,11 +16,11 @@ import torch
 from safetensors import safe_open
 from safetensors import torch as tensor_io
 
-from rcc.latent import forward_rows
-from rcc.transport import SenderState, validate_model, validate_rows
+from rclc.latent import forward_rows
+from rclc.transport import SenderState, validate_model, validate_rows
 
 if TYPE_CHECKING:
-    from rcc.hf import Agent
+    from rclc.hf import Agent
 
 save_file: Callable[[dict[str, torch.Tensor], str, dict[str, str]], None] = cast(
     Any, tensor_io
@@ -131,11 +131,11 @@ def _read_payload(path: str | Path) -> dict[str, Any]:
         metadata = cast(dict[str, str], archive.metadata() or {})
         raw: Any = json.loads(metadata.get("rcc", "{}"))
         if not isinstance(raw, dict):
-            raise ValueError("not an RCC state snapshot")
+            raise ValueError("not an RCLC state snapshot")
         payload = cast(dict[str, Any], raw)
         fields = {"format", "identity", "latent_steps", "inherited_positions"}
         if set(payload) != fields or type(payload["format"]) is not int or payload["format"] != 1:
-            raise ValueError("unsupported RCC state snapshot format")
+            raise ValueError("unsupported RCLC state snapshot format")
         keys = set(cast(list[str], archive.keys()))
         if "rows" not in keys or keys - {"rows", "ids"}:
             raise ValueError("snapshot must contain rows and optional token IDs")
@@ -147,7 +147,7 @@ def _read_payload(path: str | Path) -> dict[str, Any]:
 @torch.inference_mode()
 def read_state(path: str | Path, agent: Agent) -> SenderState:
     """Validate an input snapshot before rebuilding its cache on the caller's engine."""
-    from rcc import vllm
+    from rclc import vllm
 
     validate_model(agent.model)
     if agent.engine is not None:

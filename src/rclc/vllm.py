@@ -10,11 +10,11 @@ from typing import Any, cast
 
 import torch
 
-from rcc.capture.aliasing import hf_view_model
-from rcc.capture.connector import discard_capture as discard_capture
-from rcc.capture.connector import get_capture, require_runtime, validate_capture_config
-from rcc.capture.connector import request_capture as request_capture
-from rcc.transport import SenderState
+from rclc.capture.aliasing import hf_view_model
+from rclc.capture.connector import discard_capture as discard_capture
+from rclc.capture.connector import get_capture, require_runtime, validate_capture_config
+from rclc.capture.connector import request_capture as request_capture
+from rclc.transport import SenderState
 
 
 def require_idle(llm: Any) -> None:

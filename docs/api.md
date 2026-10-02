@@ -1,7 +1,7 @@
 # State-transfer API
 
 ```python
-await rcc.transfer(sender, receiver, request, ratio=4, representation="embeddings")
+await rclc.transfer(sender, receiver, request, ratio=4, representation="embeddings")
 ```
 
 `transfer` is an async, in-process handoff between existing agents. It returns
@@ -12,14 +12,14 @@ queue or your own network transport; there is no server or wire protocol.
 
 Await it inside an async function or notebook; a script can wrap its entry point
 in `asyncio.run(main())`, as the [quickstart](../examples/quickstart.py) does.
-`rcc.transfer_sync(...)` takes the same arguments, runs the same pipeline
+`rclc.transfer_sync(...)` takes the same arguments, runs the same pipeline
 including async callbacks, and requires a thread without a running event loop.
 
 ## Concurrency
 
 - Model work runs in worker threads. State snapshots and selection serialize;
   reasoning callbacks can await other work without holding that lock. Attention
-  forwards, including selector capture and RCC reasoning, share a process-wide
+  forwards, including selector capture and RCLC reasoning, share a process-wide
   lock. HF and in-process vLLM use the same path.
 - Keep participating agents, histories and engines idle, unchanged and
   exclusively owned until each bind, transfer, append, update, save or load
@@ -45,18 +45,18 @@ or retry. Participating state can be reused once cancellation completes.
 ## Bind an existing agent
 
 ```python
-import rcc
+import rclc
 
-agent_x = rcc.bind(model, tokenizer, messages=history_x, backend="hf")
-agent_y = rcc.bind(model, tokenizer, messages=history_y, backend="hf")
-await rcc.transfer(agent_x, agent_y, question)
+agent_x = rclc.bind(model, tokenizer, messages=history_x, backend="hf")
+agent_y = rclc.bind(model, tokenizer, messages=history_y, backend="hf")
+await rclc.transfer(agent_x, agent_y, question)
 inputs = agent_y.pop()
 output = model.generate(**inputs, return_dict_in_generate=True)
 agent_y.update(inputs=inputs, generation=output)
-await rcc.transfer(agent_y, agent_x, follow_up)  # Send the continuation back.
+await rclc.transfer(agent_y, agent_x, follow_up)  # Send the continuation back.
 ```
 
-`bind` is the constructor alias for `rcc.Agent`; an agent's position in
+`bind` is the constructor alias for `rclc.Agent`; an agent's position in
 `transfer` sets its role. Lists can mix agents and `SenderState` objects. Use
 `backend="hf"` for a loaded HF model or `backend="vllm"` for an in-process
 engine configured as in [vLLM default](#vllm-default).
@@ -74,7 +74,7 @@ both feed [receiver budget fitting](#receive-and-fit-the-handoff).
 
 Pass `update` the exact dictionary from the agent's latest `pop()` or awaited
 `inputs()`, and generate from it without adding `input_ids`. HF returns new token
-IDs for these continuous inputs; RCC keeps the exact input vectors, appends those
+IDs for these continuous inputs; RCLC keeps the exact input vectors, appends those
 tokens and completes any uncached suffix on a private cache copy. Received
 positions count as inherited state for relative budgets. Known token IDs from
 the receiver prompt, history and new tokens are kept; only received continuous
@@ -83,7 +83,7 @@ rows are `-1`, so later mixed payloads send those positions as IDs.
 A second `pop()` raises until `update()` records the continuation, so an agent
 cannot send stale state. Failed updates and pops preserve the previous state,
 pending inputs and queue. For answers that will not be sent onward,
-`pop(discard_pending=True)` replaces the pending continuation. RCC never appends
+`pop(discard_pending=True)` replaces the pending continuation. RCLC never appends
 answers to your chat history, and repeated requests stay separate queued
 handoffs with their own prompt snapshots.
 
@@ -95,7 +95,7 @@ of the [lower-level helpers](#lower-level-hugging-face-helpers) apply.
 
 ```python
 await agent_y.append(rendered_tool_result)
-await rcc.transfer(agent_y, agent_x, follow_up)       # Or continue locally:
+await rclc.transfer(agent_y, agent_x, follow_up)       # Or continue locally:
 inputs = await agent_y.inputs(max_new_tokens=64)
 ```
 
@@ -116,7 +116,7 @@ continuation, saving or sending state.
 
 ```python
 await agent_y.save("agent.safetensors")
-restored = rcc.bind(model, tokenizer, max_new_tokens=64)
+restored = rclc.bind(model, tokenizer, max_new_tokens=64)
 await restored.load("agent.safetensors")
 ```
 
@@ -138,8 +138,8 @@ files as private model input.
 
 ```python
 agent_y.inspect()       # Queue, per-sender positions, payload bytes and remaining space.
-rcc.check(agent_y)      # Signature: check(agent=None, *, backend=None, allow_unstable=None)
-await rcc.transfer(agent_x, agent_y, question, record_selection=True)
+rclc.check(agent_y)      # Signature: check(agent=None, *, backend=None, allow_unstable=None)
+await rclc.transfer(agent_x, agent_y, question, record_selection=True)
 report = agent_y.inspect(selection=True)
 html = agent_y.selection_html()   # display(HTML(html)) in a notebook, or write to a file.
 ```
@@ -148,9 +148,9 @@ html = agent_y.selection_html()   # display(HTML(html)) in a notebook, or write 
   JSON-serializable report. `remaining_positions` excludes the prompt and
   reserved output; negative means it will not fit. `cached_positions` describes
   prepared state, not changed chat history.
-- `rcc.check` reports versions, GPU availability and bound-engine configuration.
+- `rclc.check` reports versions, GPU availability and bound-engine configuration.
   With an agent, `backend` and `allow_unstable` come from it; a conflicting value
-  raises `ValueError`. `python -m rcc doctor` prints the same checks as JSON with
+  raises `ValueError`. `python -m rclc doctor` prints the same checks as JSON with
   fixes and exits nonzero on issues; add `--backend vllm` and, for 0.26.0,
   `--allow-unstable`. Neither downloads weights or establishes GPU correctness.
 - `agent.engine` is the vLLM engine or `None`; `agent.model` is the HF model or
@@ -177,7 +177,7 @@ including omitted text, in local metadata outside payload bytes. Inspect before
 ## Lower-level Hugging Face helpers
 
 ```python
-from rcc import HFReceiver, sender_from_hf, transfer
+from rclc import HFReceiver, sender_from_hf, transfer
 
 sender = sender_from_hf(model, tokenizer, sender_messages)
 receiver = HFReceiver(model, tokenizer, messages=receiver_history,
@@ -189,7 +189,7 @@ tokens = model.generate(**receiver.pop(), do_sample=False)
 `bind` is built on these. They take a loaded dense Qwen3 model in eval mode,
 unpadded single sequences and no beam search. `receiver_history` holds system
 instructions and prior turns, not the new request; the receiver appends the
-request and renders the assistant prefix with thinking disabled. RCC does not
+request and renders the assistant prefix with thinking disabled. RCLC does not
 mutate your history or run tools.
 
 Use the same checkpoint, weights and tokenizer at both ends. `transfer` rejects
@@ -226,10 +226,10 @@ conversation cache and continues with native generation.
 position unless `max_new_tokens` is set. `pop()` passes that allowance to
 `generate`, so do not pass it again.
 
-Before selection, RCC renders each receiver's history plus request. Handoff
+Before selection, RCLC renders each receiver's history plus request. Handoff
 space is the context limit minus those positions and the output allowance. The
 relative or bounded budget stays each sender's maximum; if the sum fits, budgets
-are unchanged. Otherwise RCC reserves the built-in selectors'
+are unchanged. Otherwise RCLC reserves the built-in selectors'
 [protected positions](#relative-and-bounded-budgets) and shares the rest
 equally, redistributing unused shares from short senders. Custom selectors get
 a one-position floor and enforce their own protection. Post-selection reasoning reserves its declared rows for every
@@ -268,7 +268,7 @@ shared payload tensors as read-only.
 
 ## Relative and bounded budgets
 
-Relative (`rX`) is the default; with neither option, RCC uses `r4`. Both take
+Relative (`rX`) is the default; with neither option, RCLC uses `r4`. Both take
 positive integers and apply per sender, per request. Supplying both is an error.
 
 ```python
@@ -305,19 +305,19 @@ Reasoning is off by default. Pass a callable, with settings bound by
 ```python
 from functools import partial
 
-await rcc.transfer(senders, receivers, requests,
-                   reasoning=partial(rcc.latent_mass, steps=40), budget=128)
-await rcc.transfer(senders, receivers, requests,
-                   reasoning=partial(rcc.latent_mass, steps=40),
+await rclc.transfer(senders, receivers, requests,
+                   reasoning=partial(rclc.latent_mass, steps=40), budget=128)
+await rclc.transfer(senders, receivers, requests,
+                   reasoning=partial(rclc.latent_mass, steps=40),
                    reasoning_context="selected_with_request", reasoning_budget=40)
 ```
 
-`rcc.latent_mass` is the paper's Qwen rule: feed the final hidden row back as a
+`rclc.latent_mass` is the paper's Qwen rule: feed the final hidden row back as a
 continuous input, normalized to the mean input-embedding norm. Call it directly
-with `await rcc.latent_mass(state, steps=50)`, or `latent_mass_sync` to block. It
+with `await rclc.latent_mass(state, steps=50)`, or `latent_mass_sync` to block. It
 runs sequential steps in a worker on a private cache and leaves the state
 unchanged; cancellation waits for the rollout. Request tokens used for
-conditioning are not kept; RCC replays the new rows over the original prefix.
+conditioning are not kept; RCLC replays the new rows over the original prefix.
 
 | `reasoning_context` | Timing | Inputs for reasoning |
 | --- | --- | --- |
@@ -333,7 +333,7 @@ Selected context holds only the chosen rows, not discarded instructions.
 - Before selection, the budget uses the extended state. Optional
   `reasoning_budget=N` caps new rows, otherwise the sender's remaining context
   does. Built-in selectors keep the new latent tail.
-- After selection, `reasoning_budget=N` is required. RCC uses `T + N` in the
+- After selection, `reasoning_budget=N` is required. RCLC uses `T + N` in the
   budget formula, gives the selector the rest and appends up to `N` rows: with
   `steps=50`, `reasoning_budget=50` and `budget=128`, at most 78 source rows are
   selected. Unused space is not refilled.
@@ -346,17 +346,17 @@ paths; other custom algorithms and benchmark comparisons are unvalidated.
 ### Custom methods
 
 ```python
-async def my_method(state: rcc.SenderState, *, max_positions: int,
-                    request: torch.Tensor | None = None) -> rcc.SenderState:
+async def my_method(state: rclc.SenderState, *, max_positions: int,
+                    request: torch.Tensor | None = None) -> rclc.SenderState:
     ...
 ```
 
 Async methods run on the caller's loop and can await tools, services or
-`rcc.latent_mass`; synchronous methods run in a worker with the same validation.
+`rclc.latent_mass`; synchronous methods run in a worker with the same validation.
 A method owns its stopping rule and may append 0 to `max_positions` rows. Return
 a consistent `SenderState`: add the appended count to `latent_steps`, mark new
 rows `-1` when token IDs exist, and keep the model, tokenizer, inherited count,
-input prefix and cache prefix. RCC checks shapes, finite values and prefixes; the
+input prefix and cache prefix. RCLC checks shapes, finite values and prefixes; the
 method must compute correct KV for its rows. It receives private copies of rows,
 IDs, cache and request; the model and tokenizer are shared and read-only. This is
 trusted code, not a sandbox. Async methods should propagate cancellation and
@@ -364,14 +364,14 @@ clean up; blocking methods cannot be interrupted. Any exception or invalid resul
 prevents all deliveries for the call.
 
 On a receiver, prefill its handoff and prompt into a `SenderState` and call
-`await rcc.latent_mass(receiver_state, steps=40)`, optionally with
+`await rclc.latent_mass(receiver_state, steps=40)`, optionally with
 `request=delivery.request`. These rows use model context, not transmission
 budget. `steps=0` returns the original state.
 
 ## Selectors
 
-CacheBack is the default `selector`; `rcc.selectors.qsnap` and
-`rcc.selectors.chunkkv` are built-in alternatives. Any callable
+CacheBack is the default `selector`; `rclc.selectors.qsnap` and
+`rclc.selectors.chunkkv` are built-in alternatives. Any callable
 `selector(sender, request_ids, budget) -> positions` works; it runs once per
 sender and request and is reused for every receiver. See
 [the selector guide](selectors.md) for the contract, W=4 spans and an example.
@@ -390,7 +390,7 @@ os.environ["VLLM_ATTENTION_BACKEND"] = "FLASH_ATTN"
 
 from vllm import LLM
 
-import rcc
+import rclc
 
 llm = LLM(
     model="Qwen/Qwen3-0.6B",
@@ -401,11 +401,11 @@ llm = LLM(
     gpu_memory_utilization=0.45,
     kv_transfer_config={
         "kv_connector": "RCCCaptureConnector",
-        "kv_connector_module_path": "rcc.capture.connector",
+        "kv_connector_module_path": "rclc.capture.connector",
         "kv_role": "kv_both",
     },
 )
-agent_x = rcc.bind(llm, backend="vllm", messages=history_x)
+agent_x = rclc.bind(llm, backend="vllm", messages=history_x)
 ```
 
 Capture must be enabled when the engine is created. The adapter supports one
@@ -431,7 +431,7 @@ the retained prefix plus output tokens, because `RequestOutput` does not expose
 its KV, and needs one spare context position. The engine's context limit applies.
 
 If your loop already captured the prompt, skip the second prefill with
-`rcc.bind(llm, backend="vllm", prompt=exact_ids, request_id=capture_id)` or
+`rclc.bind(llm, backend="vllm", prompt=exact_ids, request_id=capture_id)` or
 `agent.update(exact_ids, request_id=capture_id)`, where `exact_ids` is the
 captured `[1, tokens]` prompt without generated tokens. For token generations,
 pass the complete prompt and output IDs to `agent.update(...)`. The lower-level
@@ -439,7 +439,7 @@ interface registers the request in your submission loop before stepping; on
 0.11.1 the capture ID is the `add_request` ID:
 
 ```python
-from rcc.vllm import request_capture, sender_from_vllm
+from rclc.vllm import request_capture, sender_from_vllm
 
 request_capture(request_id)
 llm.llm_engine.add_request(request_id, prompt, sampling_params)
@@ -478,7 +478,7 @@ Nemotron runtimes and measured settings.
 ## Low-level sender state
 
 ```python
-from rcc import SenderState, transfer
+from rclc import SenderState, transfer
 
 sender = SenderState(
     model=sender_model,

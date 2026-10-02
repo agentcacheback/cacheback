@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as functional
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 
 def _partial_interval(available: Sequence[int], room: int, peak: int) -> range:

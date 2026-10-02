@@ -5,6 +5,18 @@ on:
   pull_request:
 
 jobs:
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check project website and demo paths
+        run: |
+          node --check website/assets/app.js
+          node website/check.mjs
+
   checks:
     runs-on: ubuntu-latest
     strategy:
@@ -24,7 +36,7 @@ jobs:
           .venv/bin/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           .venv/bin/python -m pip install ".[dev]" "transformers==${{ matrix.transformers }}"
           .venv/bin/python -m pip check
-          .venv/bin/python -c 'import rcc, sys; from pathlib import Path; assert Path(rcc.__file__).is_relative_to(Path(sys.prefix))'
+          .venv/bin/python -c 'import rclc, sys; from pathlib import Path; assert Path(rclc.__file__).is_relative_to(Path(sys.prefix))'
           scripts/install-hooks.sh
       - name: Harness
         run: .venv/bin/python scripts/check.py

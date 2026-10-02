@@ -4,12 +4,12 @@ import argparse
 import json
 import sys
 
-from rcc.diagnostics import check
+from rclc.diagnostics import check
 
 
 def main() -> None:
     """Write a JSON diagnostic and exit nonzero when setup needs attention."""
-    parser = argparse.ArgumentParser(prog="python -m rcc", description=__doc__)
+    parser = argparse.ArgumentParser(prog="python -m rclc", description=__doc__)
     parser.add_argument("command", choices=("doctor",))
     parser.add_argument("--backend", choices=("hf", "vllm"), default="hf")
     parser.add_argument("--allow-unstable", action="store_true")

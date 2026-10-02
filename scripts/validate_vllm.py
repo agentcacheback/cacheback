@@ -10,11 +10,11 @@ from typing import Any
 
 import torch
 
-from rcc import Delivery, SenderState, bind, latent_mass, transfer
-from rcc._cache import cache_kv
-from rcc.capture.connector import require_runtime
-from rcc.reasoning import ReasoningContext
-from rcc.vllm import discard_capture, request_capture, sender_from_vllm
+from rclc import Delivery, SenderState, bind, latent_mass, transfer
+from rclc._cache import cache_kv
+from rclc.capture.connector import require_runtime
+from rclc.reasoning import ReasoningContext
+from rclc.vllm import discard_capture, request_capture, sender_from_vllm
 
 
 async def _latent_prompts(
@@ -174,7 +174,7 @@ async def run(
         kv_transfer_config={
             "kv_connector": "RCCCaptureConnector",
             "kv_role": "kv_both",
-            "kv_connector_module_path": "rcc.capture.connector",
+            "kv_connector_module_path": "rclc.capture.connector",
             "kv_connector_extra_config": {"allow_unstable": allow_unstable},
         },
         **({"attention_backend": "FLASH_ATTN"} if pin == "0.26.0" else {}),

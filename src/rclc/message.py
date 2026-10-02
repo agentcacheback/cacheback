@@ -9,7 +9,7 @@ from typing import Literal
 import torch
 import torch.nn.functional as functional
 
-from rcc.selection import Selection
+from rclc.selection import Selection
 
 Representation = Literal["embeddings", "token_ids+continuous"]
 

@@ -12,12 +12,12 @@ from typing import TYPE_CHECKING
 import torch
 import torch.nn.functional as functional
 
-from rcc.selectors._capture import run_capture
-from rcc.selectors.cacheback import finite
-from rcc.selectors.fixed_spans import keep_spans, selects, span_means
+from rclc.selectors._capture import run_capture
+from rclc.selectors.cacheback import finite
+from rclc.selectors.fixed_spans import keep_spans, selects, span_means
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 
 class _WindowFold:

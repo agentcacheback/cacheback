@@ -10,9 +10,9 @@ import pytest
 import torch
 import torch.nn.functional as functional
 
-from rcc import Delivery, SenderState, latent_mass_sync, transfer_sync
-from rcc._cache import cache_kv
-from rcc.selectors import cacheback
+from rclc import Delivery, SenderState, latent_mass_sync, transfer_sync
+from rclc._cache import cache_kv
+from rclc.selectors import cacheback
 
 
 @torch.inference_mode()
@@ -262,7 +262,7 @@ def _adaptive_mean(
     request: torch.Tensor | None = None,
     tolerance: float = 0.01,
 ) -> SenderState:
-    from rcc.latent import forward_rows
+    from rclc.latent import forward_rows
 
     assert torch.is_grad_enabled() and not torch.is_inference_mode_enabled()
     limit = 2 if request is None else int(request[0, 0]) % 4
@@ -338,7 +338,7 @@ def _latent(steps: Any, context: str = "full") -> dict[str, Any]:
 
 
 def _check_callable_journey(senders: list[SenderState]) -> None:
-    from rcc import HFReceiver, bind
+    from rclc import HFReceiver, bind
 
     queries = ["Who owns Cedar ?", "When Birch launches ?"]
     state = senders[0]

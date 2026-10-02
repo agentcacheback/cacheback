@@ -35,18 +35,18 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/maxr0ssi/rclc"
-Documentation = "https://github.com/maxr0ssi/rclc/blob/main/docs/api.md"
-Issues = "https://github.com/maxr0ssi/rclc/issues"
+Repository = "https://github.com/agentcacheback/cacheback"
+Documentation = "https://github.com/agentcacheback/cacheback/blob/main/docs/api.md"
+Issues = "https://github.com/agentcacheback/cacheback/issues"
 
 [project.optional-dependencies]
 dev = ["ruff==0.15.20", "pyright==1.1.411", "pytest>=8.0"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src/rcc", "/README.md", "/LICENSE", "/pyproject.toml"]
+include = ["/src/rclc", "/README.md", "/LICENSE", "/pyproject.toml"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/rcc"]
+packages = ["src/rclc"]
 
 [tool.ruff]
 line-length = 100
@@ -68,8 +68,8 @@ ignore = ["D203", "D213", "SIM105", "SIM102", "SIM108", "SIM103", "SIM118"]
 convention = "google"
 
 [tool.pyright]
-include = ["src/rcc"]
-strict = ["src/rcc"]
+include = ["src/rclc"]
+strict = ["src/rclc"]
 pythonVersion = "3.10"
 venvPath = "."
 venv = ".venv"

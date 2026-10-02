@@ -11,11 +11,11 @@ from typing import Any, cast
 import torch
 from transformers.generation.utils import GenerateDecoderOnlyOutput
 
-from rcc import vllm
-from rcc._async import run_in_worker
-from rcc._cache import clone_cache
-from rcc.latent import forward_rows
-from rcc.transport import Delivery, SenderState, token_ids, validate_model
+from rclc import vllm
+from rclc._async import run_in_worker
+from rclc._cache import clone_cache
+from rclc.latent import forward_rows
+from rclc.transport import Delivery, SenderState, token_ids, validate_model
 
 Chat = Sequence[dict[str, Any]]
 
@@ -191,7 +191,7 @@ class HFReceiver:
     def _next(self) -> tuple[Delivery, PreparedRequest]:
         if not self._deliveries:
             raise IndexError(
-                "no queued handoff; await rcc.transfer (or call transfer_sync) before pop"
+                "no queued handoff; await rclc.transfer (or call transfer_sync) before pop"
             )
         return self._deliveries[0]
 
@@ -398,7 +398,7 @@ class Agent(HFReceiver):
 
     async def save(self, path: str | Path) -> None:
         """Atomically save retained input state, checking that no pending work would be lost."""
-        from rcc.checkpoint import write_state
+        from rclc.checkpoint import write_state
 
         self._require_settled()
         state = await run_in_worker(self.sender_state)
@@ -406,7 +406,7 @@ class Agent(HFReceiver):
 
     async def load(self, path: str | Path) -> None:
         """Check a saved state's checkpoint identity and re-prefill it on this bound model."""
-        from rcc.checkpoint import read_state
+        from rclc.checkpoint import read_state
 
         self._require_settled()
         state = await run_in_worker(read_state, path, self)

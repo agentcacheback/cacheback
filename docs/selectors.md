@@ -2,7 +2,7 @@
 
 `transfer` accepts a selector callable and defaults to CacheBack. Budgeting,
 payload encoding and delivery stay in transport; the selector chooses positions.
-The public type alias is `rcc.selectors.Selector`.
+The public type alias is `rclc.selectors.Selector`.
 
 ## Built-in selectors
 
@@ -15,8 +15,8 @@ The public type alias is `rcc.selectors.Selector`.
 ```python
 from functools import partial
 
-from rcc import transfer
-from rcc.selectors import chunkkv, qsnap
+from rclc import transfer
+from rclc.selectors import chunkkv, qsnap
 
 await transfer(senders, receivers, requests, selector=qsnap)
 await transfer(senders, receivers, requests, selector=partial(chunkkv, window_size=64))
@@ -38,7 +38,7 @@ baselines stay on `paper`.
 
 ```python
 import torch
-from rcc import SenderState, transfer
+from rclc import SenderState, transfer
 
 def recent(sender: SenderState, request_ids: torch.Tensor, budget: int) -> list[int]:
     """Keep the most recent positions within the resolved budget."""
@@ -55,7 +55,7 @@ Transport rejects empty, duplicate, noninteger, out-of-range or over-budget
 selections, then orders the positions by their original source index.
 
 Custom selectors can return fewer positions and define their own retention
-rules; `recent` above does not reserve the first position. RCC does not run
+rules; `recent` above does not reserve the first position. RCLC does not run
 CacheBack or disable gradients around a custom selector. The callable must leave
 the sender's model, cache and input rows unchanged. Exceptions propagate before
 any delivery; selection is reused across receivers of the same request.
@@ -65,16 +65,16 @@ To compare a method with CacheBack, see [Contributing](../CONTRIBUTING.md).
 ## Package layout
 
 ```text
-src/rcc/
+src/rclc/
 |-- __init__.py           # Public API
-|-- __main__.py           # `python -m rcc doctor`
+|-- __main__.py           # `python -m rclc doctor`
 |-- transport.py          # Routing, budgets, validation and delivery
 |-- message.py            # Payload representations
 |-- selection.py          # Opt-in selection records and HTML view
 |-- latent.py             # Built-in continuous rollout
 |-- reasoning.py          # Callable reasoning and output validation
 |-- checkpoint.py         # Safetensors state snapshots
-|-- diagnostics.py        # Setup checks behind `rcc.check`
+|-- diagnostics.py        # Setup checks behind `rclc.check`
 |-- hf.py                 # Hugging Face bindings and Agent
 |-- vllm.py               # Existing-agent state adapter
 |-- _async.py             # Cancellation-safe worker calls
@@ -115,7 +115,7 @@ For W=4:
 
 ```python
 from functools import partial
-from rcc.selectors import cacheback
+from rclc.selectors import cacheback
 
 await transfer(senders, receivers, requests, selector=partial(cacheback, span_size=4))
 ```

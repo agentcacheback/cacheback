@@ -13,11 +13,11 @@ from typing import Any
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-import rcc
-from rcc.selectors import Selector, cacheback, chunkkv, qsnap
+import rclc
+from rclc.selectors import Selector, cacheback, chunkkv, qsnap
 
 
-def recent(state: rcc.SenderState, request_ids: torch.Tensor, budget: int) -> list[int]:
+def recent(state: rclc.SenderState, request_ids: torch.Tensor, budget: int) -> list[int]:
     """Keep the most recent positions as a simple comparison."""
     return list(range(len(state.input_embeds) - budget, len(state.input_embeds)))
 
@@ -69,18 +69,20 @@ async def evaluate(
     """Compare identical cached sources, requests and generation settings for each selector."""
     results = []
     for index, case in enumerate(cases):
-        senders = [rcc.sender_from_hf(model, tokenizer, document) for document in case["documents"]]
+        senders = [
+            rclc.sender_from_hf(model, tokenizer, document) for document in case["documents"]
+        ]
         for name, selector in selectors.items():
-            receiver = rcc.bind(
+            receiver = rclc.bind(
                 model,
                 tokenizer,
                 max_new_tokens=max_new_tokens,
                 messages=[{"role": "system", "content": "Answer with only the short answer."}],
             )
-            deliveries: list[rcc.Delivery] = []
+            deliveries: list[rclc.Delivery] = []
             _synchronize(model)
             started = time.perf_counter()
-            await rcc.transfer(
+            await rclc.transfer(
                 senders,
                 [receiver, deliveries.append],
                 case["question"],

@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any, cast
 
 import torch
 
-from rcc._async import run_in_worker
-from rcc._cache import ATTENTION_LOCK, cache_kv, clone_cache, get_backbone
+from rclc._async import run_in_worker
+from rclc._cache import ATTENTION_LOCK, cache_kv, clone_cache, get_backbone
 
 if TYPE_CHECKING:
-    from rcc.transport import SenderState
+    from rclc.transport import SenderState
 
 
 def _validate_count(value: int, name: str) -> None:

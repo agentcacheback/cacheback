@@ -4,18 +4,18 @@ import asyncio
 import os
 from typing import Any
 
-import rcc
+import rclc
 
 
 async def handoff(llm: Any) -> str:
     """Transfer notes, generate natively and record the receiver's continuation."""
-    sender = rcc.bind(
+    sender = rclc.bind(
         llm,
         backend="vllm",
         prompt="Cedar is owned by Maya Chen and launches October 12. " * 8,
     )
-    receiver = rcc.bind(llm, backend="vllm", max_new_tokens=64)
-    await rcc.transfer(sender, receiver, "Who owns Cedar?")
+    receiver = rclc.bind(llm, backend="vllm", max_new_tokens=64)
+    await rclc.transfer(sender, receiver, "Who owns Cedar?")
     inputs = receiver.pop()
     inputs["sampling_params"].temperature = 0
     output = llm.generate(**inputs)
@@ -38,7 +38,7 @@ def main() -> None:
         gpu_memory_utilization=0.45,
         kv_transfer_config={
             "kv_connector": "RCCCaptureConnector",
-            "kv_connector_module_path": "rcc.capture.connector",
+            "kv_connector_module_path": "rclc.capture.connector",
             "kv_role": "kv_both",
         },
     )

@@ -10,7 +10,7 @@ import torch
 import transformers
 from demo.record import ANSWER_INSTRUCTION, DOCUMENTS, QUESTIONS, record, respond, save
 
-from rcc import SenderState
+from rclc import SenderState
 
 
 def test_demo_records_source_positions_messages_answers_and_json(
@@ -196,4 +196,4 @@ def test_colab_records_offline_from_a_source_archive_and_downloads_a_replay(
                 case["expected_text"].lower() in case["answer"].lower()
             )
         assert b"Saved" in archive.read("run.log")
-        assert b"from rcc import bind, transfer" in archive.read("run.py")
+        assert b"from rclc import bind, transfer" in archive.read("run.py")

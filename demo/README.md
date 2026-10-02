@@ -1,11 +1,16 @@
-# CacheBack demo
+# CacheBack booking relay
+
+The replay labels the method CacheBack; `rclc` remains its recording key.
 
 Three agents pass evidence to a fourth. Maya's booking reference J7 leads to
 Harbour Hub, whose passport requirement overrides the original desk's ID advice.
 
 ## Watch
 
-Open <https://maxr0ssi.github.io/rclc/demo/> and press **Run**. To serve it
+The [booking section](../index.html#booking-demo), below the main coding video, presents the recorded final answers
+and completion times before the replay. Selected positions use teal highlights.
+
+Open <https://agentcacheback.github.io/demo/> and press **Run**. To serve it
 locally, run this from the repository root and open <http://127.0.0.1:8765/demo/>:
 
 ```bash
@@ -22,8 +27,11 @@ intermediate messages, exact token origins and timings.
   `collection-id-rules.txt`. Each shows the source document with RCLC highlights
   and the generated text handoff. The last column shows both unedited answers
   and their total times.
-- Text boxes follow the newest generated line. Documents and messages scroll; on
-  a small screen, scroll the whole diagram horizontally.
+- Text boxes follow the newest generated line. Documents and messages scroll
+  within their compact panes. On smaller screens, agent cards form two columns,
+  then one on phones, with their agent labels repeated above the content.
+  An embedded replay resizes to its content, so its outer frame never needs
+  horizontal or vertical scrolling. Scroll the containing page normally.
 - **Replay** restarts. **Clear** stops playback and resets the highlights,
   messages and clocks.
 - The reviewed 8B answer shows `✓ Harbour Hub · Passport` when it finishes. The
@@ -33,7 +41,8 @@ intermediate messages, exact token origins and timings.
 Playback defaults to **1x**; **2x** and **4x** speed it up. Each method
 progresses independently from its measured handoff durations and total
 completion time, so the faster one finishes while the other keeps streaming, and
-the clocks show recorded time. Completion times are measured; streaming is
+the clocks show recorded time. Playback starts from the first animation-frame
+timestamp, keeping embedded-frame clock origins from producing negative time. Completion times are measured; streaming is
 illustrative. Text streams at an estimated constant character rate within each
 stage, because the recording has no per-token timestamps or separate
 prefill/decode timings. Reduced-motion preferences disable the highlight
@@ -41,7 +50,7 @@ animation.
 
 ## Record
 
-Install RCC as described in the [repository README](../README.md#install), then
+Install RCLC as described in the [repository README](../README.md#install), then
 run:
 
 ```bash
@@ -61,12 +70,12 @@ GPU with a high-RAM host. Prepare its source bundle from a committed checkout:
 
 ```bash
 mkdir -p output/colab
-git archive --format=zip --output=output/colab/rcc-demo-colab-source.zip HEAD
+git archive --format=zip --output=output/colab/rclc-demo-colab-source.zip HEAD
 ```
 
 Upload that ZIP when prompted, mount Drive and run the cells in order. Each run
 saves its source, configuration, environment, complete logs and traces to a new
-`MyDrive/rcc-demo/<run-id>/` folder. The notebook retains its width comparison
+`MyDrive/rclc-demo/<run-id>/` folder. The notebook retains its width comparison
 for analysis; the viewer shows W=4 only. The last cell downloads a portable
 replay; serve its extracted directory with the command above. Replay needs no
 model.
@@ -79,7 +88,7 @@ handoff alone. Later agents cannot reread discarded evidence.
 
 Text generates new notes; each text column is the actual message generated at
 that step, not a summary written for the viewer. RCLC sends selected input
-embeddings through `rcc.transfer_sync`, with no extra latent steps. Highlights
+embeddings through `rclc.transfer_sync`, with no extra latent steps. Highlights
 follow exact tokenizer offsets, including word fragments. As another document
 arrives, selection can drop evidence retained at the previous handoff.
 

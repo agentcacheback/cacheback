@@ -5,7 +5,7 @@ import asyncio
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from rcc import bind, transfer
+from rclc import bind, transfer
 
 
 async def main() -> None:

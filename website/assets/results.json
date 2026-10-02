@@ -1,0 +1,61 @@
+{
+  "source": "https://arxiv.org/html/2609.32046v1",
+  "table": "Table 1: selected operating points, FanOutQA",
+  "tasks": 50,
+  "gpus": "8 H100",
+  "receiver_draws": 3,
+  "models": {
+    "qwen": {
+      "name": "Qwen 3",
+      "size": "8B",
+      "ratio": 4,
+      "text": {
+        "accuracy": 0.4067,
+        "seconds": 611.9
+      },
+      "cache": {
+        "accuracy": 0.5533,
+        "seconds": 191.9
+      }
+    },
+    "nemotron": {
+      "name": "Nemotron Nano 2",
+      "size": "12B",
+      "ratio": 8,
+      "text": {
+        "accuracy": 0.38666666666666666,
+        "seconds": 131.2367
+      },
+      "cache": {
+        "accuracy": 0.5,
+        "seconds": 101.6259
+      }
+    },
+    "gemma": {
+      "name": "Gemma 4",
+      "size": "12B",
+      "ratio": 4,
+      "text": {
+        "accuracy": 0.52,
+        "seconds": 603.1
+      },
+      "cache": {
+        "accuracy": 0.5933,
+        "seconds": 201.3
+      }
+    },
+    "ministral": {
+      "name": "Ministral 3",
+      "size": "14B",
+      "ratio": 32,
+      "text": {
+        "accuracy": 0.3867,
+        "seconds": 1536.9
+      },
+      "cache": {
+        "accuracy": 0.5933,
+        "seconds": 193.3
+      }
+    }
+  }
+}

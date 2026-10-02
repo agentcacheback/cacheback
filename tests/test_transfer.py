@@ -10,13 +10,13 @@ import pytest
 import torch
 import torch.nn.functional as functional
 
-from rcc import Delivery, SenderState, transfer_sync, transport
-from rcc._cache import cache_kv
-from rcc.selectors import _capture, _support, cacheback, chunkkv, qsnap
-from rcc.selectors.cacheback import cacheback_scores
-from rcc.selectors.chunkkv import chunkkv_scores
-from rcc.selectors.fixed_spans import fixed_span_keep
-from rcc.selectors.qsnap import qsnap_scores
+from rclc import Delivery, SenderState, transfer_sync, transport
+from rclc._cache import cache_kv
+from rclc.selectors import _capture, _support, cacheback, chunkkv, qsnap
+from rclc.selectors.cacheback import cacheback_scores
+from rclc.selectors.chunkkv import chunkkv_scores
+from rclc.selectors.fixed_spans import fixed_span_keep
+from rclc.selectors.qsnap import qsnap_scores
 
 
 def _snapshot(state: SenderState) -> list[tuple[torch.Tensor, torch.Tensor]]:

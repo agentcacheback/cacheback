@@ -9,7 +9,7 @@ import pytest
 import torch
 from examples.existing_agents import handoff
 
-from rcc import (
+from rclc import (
     Agent,
     Delivery,
     HFReceiver,
@@ -123,7 +123,7 @@ def test_hf_agents_transfer_and_generate(senders: list[SenderState], monkeypatch
 def test_existing_agent_history_and_receiver_budget(
     senders: list[SenderState], monkeypatch: Any
 ) -> None:
-    from rcc._cache import cache_kv
+    from rclc._cache import cache_kv
 
     model, tokenizer = senders[0].model, senders[0].tokenizer
     tokenizer.chat_template = (
@@ -293,7 +293,7 @@ def test_existing_agent_history_and_receiver_budget(
     transfer_sync(bound, [roomy, recorded.append], requests[0])
     assert recorded[-1].messages[0].positions == 10 + (bound.input_embeds.shape[0] - 10 + 3) // 4
     roomy.pop()
-    from rcc.selectors import cacheback
+    from rclc.selectors import cacheback
 
     for selector in (cacheback, partial(cacheback, span_size=4)):
         with pytest.raises(ValueError, match="required positions"):
@@ -413,7 +413,7 @@ def test_existing_agent_history_and_receiver_budget(
     assert agent_y.sender_state().inherited_positions > 0
     with pytest.raises(ValueError, match="backend='hf'"):
         bind(model, tokenizer, backend="vllm")
-    from rcc import vllm
+    from rclc import vllm
 
     with monkeypatch.context() as patch:
         patch.setattr(vllm, "binding_model", lambda llm, tok, *args: (model, tok, 512))

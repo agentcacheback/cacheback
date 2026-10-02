@@ -14,9 +14,9 @@ from typing import Any, Protocol, cast
 
 import torch
 
-from rcc._cache import ATTENTION_LOCK, clone_cache, get_backbone
+from rclc._cache import ATTENTION_LOCK, clone_cache, get_backbone
 
-CAPTURE_IMPL = "rcc_vote_capture"
+CAPTURE_IMPL = "rclc_vote_capture"
 
 Attention = Callable[..., object]
 
