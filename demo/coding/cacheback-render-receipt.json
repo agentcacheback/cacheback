@@ -1,0 +1,16 @@
+{
+  "width": 3840,
+  "height": 2160,
+  "fps": 60,
+  "seconds": 36,
+  "frames": 2160,
+  "claims": {
+    "passed": true,
+    "run": "bughunt-16333-run-20261001T051520Z",
+    "textSeconds": 113.20635836,
+    "latentSeconds": 25.66205141,
+    "tests": 88,
+    "textFinish": 31.69303836875,
+    "duration": 36
+  }
+}

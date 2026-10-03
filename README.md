@@ -18,11 +18,22 @@ that request to choose which sender positions enter the handoff.
 with 50 concurrent tasks on eight H100 GPUs. Operating points differ by family.
 Right: the receiver query guides which sender positions enter the handoff.*
 
+## Architecture animation
+
+**[▶ Explore the interactive architecture animation](https://agentcacheback.github.io/demo/communication.html)**
+
+[![CacheBack selects sender positions for the receiver's request and passes them with latent steps, keeping the receiver within its context limit.](docs/assets/cacheback-architecture.svg)](https://agentcacheback.github.io/demo/communication.html)
+
+See how receiver-conditioned selection keeps the handoff small instead of
+forwarding every sender's full cache.
+
 ## Watch the demo
 
 **[▶ Watch the 36-second coding demo](https://agentcacheback.github.io/#demo)**
 
-[![CacheBack finishes a Django fix while text workers are still writing reports.](demo/coding/poster.jpg)](https://agentcacheback.github.io/#demo)
+[![CacheBack finishes a Django fix while text workers are still generating messages.](demo/coding/cacheback-coding-poster.jpg)](https://agentcacheback.github.io/#demo)
+
+[Download the updated 4K video](demo/coding/cacheback-coding-4k.mp4).
 
 Seven Qwen3-8B workers help a coordinator fix a Django bug. CacheBack completes
 this recorded case in **25.66 s**, versus **113.21 s** for text: **4.41× faster**.
