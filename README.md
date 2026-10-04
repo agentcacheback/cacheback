@@ -22,10 +22,10 @@ Right: the receiver query guides which sender positions enter the handoff.*
 
 **[▶ Explore the interactive architecture animation](https://agentcacheback.github.io/demo/communication.html)**
 
-[![CacheBack selects sender positions for the receiver's request and passes them with latent steps, keeping the receiver within its context limit.](docs/assets/cacheback-architecture.svg)](https://agentcacheback.github.io/demo/communication.html)
+[![CacheBack selects sender positions for the receiver's request and passes them with latent steps, keeping the receiver within its context limit.](docs/assets/cacheback-architecture-play.svg)](https://agentcacheback.github.io/demo/communication.html)
 
-See how receiver-conditioned selection keeps the handoff small instead of
-forwarding every sender's full cache.
+Click the preview to open the interactive animation, then press **Play**.
+It shows how receiver-conditioned selection keeps the handoff small.
 
 ## Watch the demo
 
